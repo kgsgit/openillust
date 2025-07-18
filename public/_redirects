@@ -1,0 +1,2 @@
+# /cdn/<bucket>/<path> 요청을 Supabase Storage 로 프록시
+/cdn/*  https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/:splat  200

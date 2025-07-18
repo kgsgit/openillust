@@ -1,0 +1,18 @@
+# netlify.toml
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# /cdn/illustrations/images/* 로 들어오는 요청을 Supabase public bucket으로 프록시
+[[redirects]]
+  from    = "/cdn/illustrations/images/*"
+  to      = "https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/illustrations/images/:splat"
+  status  = 200
+  force   = true
+
+# 프록시된 /cdn/illustrations/images/* 응답에 장기 캐시 헤더 추가
+[[headers]]
+  for = "/cdn/illustrations/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
