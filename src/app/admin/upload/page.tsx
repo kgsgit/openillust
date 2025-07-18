@@ -237,9 +237,7 @@ export default function UploadPage() {
                   onChange={e => {
                     const v = e.target.value;
                     setSelectedTags(prev =>
-                      prev.includes(v)
-                        ? prev.filter(x => x !== v)
-                        : [...prev, v]
+                      prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]
                     );
                   }}
                 />
@@ -304,5 +302,5 @@ export default function UploadPage() {
         </button>
       </form>
     </div>
-);
+  );
 }
