@@ -1,3 +1,5 @@
+// src/app/api/admin/tags/[id]/route.ts
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
@@ -14,6 +16,7 @@ async function requireAuth(req: NextRequest) {
   return null
 }
 
+// DELETE /api/admin/tags/[id]
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -22,10 +25,14 @@ export async function DELETE(
   const unauth = await requireAuth(req)
   if (unauth) return unauth
 
-  // 2) ID 유효성 검사
-  const { id } = params
-  if (!id) {
+  // 2) ID 유효성 검사 & 숫자 변환
+  const idStr = params.id
+  if (!idStr) {
     return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+  }
+  const id = parseInt(idStr, 10)
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
   }
 
   // 3) 삭제
