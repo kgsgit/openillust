@@ -1,3 +1,5 @@
+# netlify.toml
+
 [build]
   command   = "npm run build"
   publish   = ".next"
@@ -26,9 +28,9 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# API 경로를 Netlify Functions로 리디렉션
+# API 경로를 Netlify Functions로 리디렉션 (단일 admin 함수 사용)
 [[redirects]]
   from = "/api/admin/*"
-  to = "/.netlify/functions-internal/admin/:splat"
+  to   = "/.netlify/functions-internal/admin"
   status = 200
   force = true
