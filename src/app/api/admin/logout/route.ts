@@ -6,16 +6,19 @@ import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   const supabase = createRouteHandlerClient({ cookies });
-  // Supabase 서버 로그아웃 (세션 무효화)
   await supabase.auth.signOut();
 
-  // 로그아웃 후 리다이렉트 응답 생성
-  const redirectUrl = new URL('/admin/login', request.url);
-  const res = NextResponse.redirect(redirectUrl);
+  const res = NextResponse.json({ success: true }, { status: 200 });
 
-  // HTTP-only 쿠키 (토큰) 삭제
-  res.cookies.delete('sb-jtdmtrdqhefekqgfxnpf-auth-token');
-  res.cookies.delete('sb-jtdmtrdqhefekqgfxnpf-refresh-token');
+  // 쿠키 삭제: 객체 형식으로 인자 전달
+  res.cookies.delete({
+    name: 'sb-ooblqjwvjkldzazshjmw-auth-token',
+    path: '/',
+  });
+  res.cookies.delete({
+    name: 'sb-ooblqjwvjkldzazshjmw-refresh-token',
+    path: '/',
+  });
 
   return res;
 }
