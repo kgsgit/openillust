@@ -5,7 +5,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# CORS 헤더 추가
+# CORS 헤더 (API 요청 허용)
 [[headers]]
   for = "/api/*"
   [headers.values]
@@ -13,7 +13,7 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
 
-# Supabase Storage public bucket으로 가는 프록시 (CDN 캐싱 포함)
+# Supabase Storage public bucket 프록시 (CDN 캐싱 포함)
 [[redirects]]
   from    = "/cdn/illustrations/images/*"
   to      = "https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/illustrations/images/:splat"
@@ -25,10 +25,3 @@
   for = "/cdn/illustrations/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-# API 경로를 Netlify Functions로 리디렉션 (단일 admin 함수 사용)
-[[redirects]]
-  from = "/api/admin/*"
-  to   = "/.netlify/functions-internal/admin"
-  status = 200
-  force = true
