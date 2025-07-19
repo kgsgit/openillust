@@ -5,7 +5,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# CORS 헤더 (API 요청 허용)
 [[headers]]
   for = "/api/*"
   [headers.values]
@@ -13,14 +12,12 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
 
-# Supabase Storage public bucket 프록시 (CDN 캐싱 포함)
 [[redirects]]
   from    = "/cdn/illustrations/images/*"
   to      = "https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/illustrations/images/:splat"
   status  = 200
   force   = true
 
-# 프록시된 이미지에 장기 캐시 헤더 추가
 [[headers]]
   for = "/cdn/illustrations/images/*"
   [headers.values]
