@@ -1,8 +1,9 @@
-// 파일 경로: src/app/admin/upload/page.tsx
-'use client';
+'use client';                                  // 1) 반드시 최상단
+export const dynamic = 'force-dynamic';        // 2) 클라이언트 전용 강제 렌더링
 
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';  // Suspense 임포트 추가
 
 interface Collection {
   id: number;
@@ -10,7 +11,15 @@ interface Collection {
 }
 
 export default function UploadPage() {
-  const router = useRouter();
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchParamsComponent />
+    </Suspense>
+  );
+}
+
+function SearchParamsComponent() {
+  const router = useRouter();  // useRouter()를 여기로 이동
   const params = useSearchParams();
   const id = params.get('id');
 
@@ -37,9 +46,7 @@ export default function UploadPage() {
     (async () => {
       // 1) 컬렉션 목록 (관리자용)
       const colRes = await fetch('/api/admin/collections', { credentials: 'include' });
-      if (colRes.ok) {
-        setCollections(await colRes.json());
-      }
+      if (colRes.ok) setCollections(await colRes.json());
 
       // 2) 태그 목록 (관리자용)
       const tagRes = await fetch('/api/admin/tags', { credentials: 'include' });
@@ -69,12 +76,10 @@ export default function UploadPage() {
   const handleCreateCollection = async () => {
     const name = newCollectionName.trim();
     if (!name) return;
-
     if (collections.some(c => c.name === name)) {
       setError('이미 존재하는 컬렉션입니다.');
       return;
     }
-
     setError(null);
     const res = await fetch('/api/admin/collections', {
       method: 'POST',
@@ -83,12 +88,10 @@ export default function UploadPage() {
       body: JSON.stringify({ name }),
     });
     const created = await res.json();
-
     if (!res.ok) {
       setError(created.error || '컬렉션 생성 실패');
       return;
     }
-
     setCollections(prev => [...prev, created]);
     setCollectionId(String(created.id));
     setNewCollectionName('');
@@ -98,12 +101,10 @@ export default function UploadPage() {
   const handleCreateTag = async () => {
     const name = newTagName.trim();
     if (!name) return;
-
     if (tagsList.includes(name)) {
       setError('이미 존재하는 태그입니다.');
       return;
     }
-
     setError(null);
     const res = await fetch('/api/admin/tags', {
       method: 'POST',
@@ -112,12 +113,10 @@ export default function UploadPage() {
       body: JSON.stringify({ name }),
     });
     const created: { id: number; name: string } = await res.json();
-
     if (!res.ok) {
       setError((created as any).error || '태그 생성 실패');
       return;
     }
-
     setTagsList(prev => [...prev, created.name]);
     setSelectedTags(prev => [...prev, created.name]);
     setNewTagName('');
@@ -127,12 +126,10 @@ export default function UploadPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-
     if (!title.trim() || !collectionId) {
       setError('제목과 컬렉션은 필수입니다.');
       return;
     }
-
     const form = new FormData();
     form.append('title', title.trim());
     form.append('description', description.trim());
@@ -146,7 +143,6 @@ export default function UploadPage() {
 
     const res = await fetch(url, { method, credentials: 'include', body: form });
     const result = await res.json();
-
     if (!res.ok) {
       setError(result.error || '업로드 요청에 실패했습니다.');
     } else {
@@ -200,9 +196,7 @@ export default function UploadPage() {
           >
             <option value="">선택하세요</option>
             {collections.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
           <div className="flex gap-2 mt-2">
@@ -237,7 +231,9 @@ export default function UploadPage() {
                   onChange={e => {
                     const v = e.target.value;
                     setSelectedTags(prev =>
-                      prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]
+                      prev.includes(v)
+                        ? prev.filter(x => x !== v)
+                        : [...prev, v]
                     );
                   }}
                 />

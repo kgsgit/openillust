@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // (기존 설정이 있다면 이 안에 함께 놓으세요)
   async rewrites() {
     return [
       {
