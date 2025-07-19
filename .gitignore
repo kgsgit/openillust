@@ -7,7 +7,8 @@ out/           # next export 로 정적 사이트를 내보낼 때
 build/         # (프로젝트에 따라 달라질 수 있음)
 
 # Netlify 로컬 설정
-.netlify/
+.netlify/*
+!/.netlify/functions-internal  # Netlify Functions는 추적해야 함
 netlify.toml   # (원본으로 관리하길 원치 않는다면)
 
 # 환경 변수
