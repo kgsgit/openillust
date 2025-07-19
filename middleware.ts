@@ -1,3 +1,5 @@
+// 파일 경로: middleware.ts
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createMiddlewareSupabaseClient } from '@supabase/auth-helpers-nextjs';
@@ -15,7 +17,8 @@ export async function middleware(req: NextRequest) {
 
   // /admin 및 /api/admin 접근 시 세션 체크
   if (
-    pathname.startsWith('/admin') ||
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/') ||
     pathname.startsWith('/api/admin')
   ) {
     const res = NextResponse.next();
@@ -37,6 +40,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    '/admin',
     '/admin/:path*',
     '/api/admin/:path*',
   ],
