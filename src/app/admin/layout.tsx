@@ -1,4 +1,3 @@
-// 파일 경로: src/app/admin/layout.tsx
 'use client';
 
 import { ReactNode, useEffect } from 'react';
