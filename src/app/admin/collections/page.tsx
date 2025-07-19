@@ -1,7 +1,7 @@
-// 파일 경로: src/app/admin/collections/page.tsx
 'use client';
 
 import React, { useState, useEffect, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Collection {
   id: number;
@@ -12,6 +12,7 @@ interface Collection {
 }
 
 export default function CollectionsPage() {
+  const router = useRouter();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [name, setName] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
@@ -28,11 +29,15 @@ export default function CollectionsPage() {
 
   const fetchCollections = async () => {
     const res = await fetch('/api/admin/collections');
-    if (res.ok) {
-      setCollections(await res.json());
-    } else {
-      setError('컬렉션 목록을 불러오지 못했습니다.');
+    if (res.status === 401) {
+      router.replace('/admin/login');
+      return;
     }
+    if (!res.ok) {
+      setError('컬렉션 목록을 불러오지 못했습니다.');
+      return;
+    }
+    setCollections(await res.json());
   };
 
   useEffect(() => {
@@ -58,6 +63,10 @@ export default function CollectionsPage() {
         description: description || null,
       }),
     });
+    if (res.status === 401) {
+      router.replace('/admin/login');
+      return;
+    }
     const created = await res.json();
     if (!res.ok) {
       setError(created.error || '생성 실패');
@@ -99,6 +108,10 @@ export default function CollectionsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editFields),
     });
+    if (res.status === 401) {
+      router.replace('/admin/login');
+      return;
+    }
     const updated = await res.json();
     if (!res.ok) {
       setError(updated.error || '수정 실패');
@@ -111,8 +124,12 @@ export default function CollectionsPage() {
   const deleteOne = async (id: number) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     const res = await fetch(`/api/admin/collections?id=${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
+    if (res.status === 401) {
+      router.replace('/admin/login');
+      return;
+    }
     if (!res.ok) {
       const r = await res.json();
       setError(r.error || '삭제 실패');
@@ -126,7 +143,6 @@ export default function CollectionsPage() {
       <h1 className="text-2xl font-semibold">컬렉션 관리</h1>
       {error && <div className="text-red-600">{error}</div>}
 
-      {/* 생성/편집 폼 */}
       <form
         onSubmit={editingId ? saveEdit : handleCreate}
         className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded shadow"
@@ -201,29 +217,16 @@ export default function CollectionsPage() {
         </div>
       </form>
 
-      {/* 컬렉션 리스트 */}
       <div className="overflow-x-auto bg-white rounded shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                ID
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                이름
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                썸네일1
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                썸네일2
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                설명
-              </th>
-              <th className="px-4 py-2 text-center text-sm font-medium text-gray-600">
-                액션
-              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">ID</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">이름</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">썸네일1</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">썸네일2</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">설명</th>
+              <th className="px-4 py-2 text-center text-sm font-medium text-gray-600">액션</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -249,20 +252,12 @@ export default function CollectionsPage() {
                     />
                   )}
                 </td>
-                <td className="px-4 py-2 text-sm truncate max-w-xs">
-                  {c.description}
-                </td>
+                <td className="px-4 py-2 text-sm truncate max-w-xs">{c.description}</td>
                 <td className="px-4 py-2 text-center space-x-2">
-                  <button
-                    onClick={() => startEdit(c)}
-                    className="text-blue-600 hover:underline"
-                  >
+                  <button onClick={() => startEdit(c)} className="text-blue-600 hover:underline">
                     수정
                   </button>
-                  <button
-                    onClick={() => deleteOne(c.id)}
-                    className="text-red-600 hover:underline"
-                  >
+                  <button onClick={() => deleteOne(c.id)} className="text-red-600 hover:underline">
                     삭제
                   </button>
                 </td>
