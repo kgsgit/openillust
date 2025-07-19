@@ -10,19 +10,30 @@ export async function POST(request: NextRequest) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.session) {
-    return NextResponse.json({ error: error?.message ?? 'Login failed' }, { status: 401 });
+    return NextResponse.json(
+      { error: error?.message ?? 'Login failed' },
+      { status: 401 }
+    );
   }
 
-  // 세션에서 토큰 꺼내기
+  // 세션 토큰 추출
   const { access_token, refresh_token, expires_in } = data.session;
 
-  // 리다이렉트 응답 생성
-  const res = NextResponse.redirect(new URL('/admin', request.url));
+  // JSON 응답으로 변경
+  const res = NextResponse.json({ success: true }, { status: 200 });
 
-  // access-token 쿠키 (기존 helper가 내려주는 것과 중복되지 않도록 확인)
+  // access-token 쿠키 설정
   res.cookies.set({
     name: `sb-jtdmtrdqhefekqgfxnpf-auth-token`,
-    value: JSON.stringify([access_token, data.session.token_type, expires_in, refresh_token, null, null, null]),
+    value: JSON.stringify([
+      access_token,
+      data.session.token_type,
+      expires_in,
+      refresh_token,
+      null,
+      null,
+      null
+    ]),
     maxAge: expires_in,
     path: '/',
     sameSite: 'lax',

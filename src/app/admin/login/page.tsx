@@ -1,4 +1,3 @@
-// 파일 경로: src/app/admin/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -16,18 +15,23 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const res = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!res.ok) {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
       const body = await res.json();
-      setError(body.error ?? 'Login failed');
+
+      if (!res.ok) {
+        setError(body.error ?? 'Login failed');
+      } else {
+        router.replace('/admin');
+      }
+    } catch (err) {
+      setError('Network error');
+    } finally {
       setLoading(false);
-    } else {
-      router.replace('/admin');
     }
   };
 
@@ -69,5 +73,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-  );
+);
 }
