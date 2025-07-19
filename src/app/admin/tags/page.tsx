@@ -1,7 +1,7 @@
-// 파일 경로: src/app/admin/tags/page.tsx
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Tag {
   id: number;
@@ -9,6 +9,7 @@ interface Tag {
 }
 
 export default function TagsPage() {
+  const router = useRouter();
   const [tags, setTags] = useState<Tag[]>([]);
   const [newTag, setNewTag] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,11 @@ export default function TagsPage() {
   const fetchTags = async () => {
     setError(null);
     try {
-      const res = await fetch('/api/admin/tags', { credentials: 'include' });
+      const res = await fetch('/api/admin/tags');
+      if (res.status === 401) {
+        router.replace('/admin/login');
+        return;
+      }
       if (!res.ok) throw new Error('태그 목록을 불러오는 데 실패했습니다.');
       const data: Tag[] = await res.json();
       setTags(data);
@@ -46,10 +51,13 @@ export default function TagsPage() {
     try {
       const res = await fetch('/api/admin/tags', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
+      if (res.status === 401) {
+        router.replace('/admin/login');
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '태그 생성에 실패했습니다.');
 
@@ -68,8 +76,11 @@ export default function TagsPage() {
     try {
       const res = await fetch(`/api/admin/tags/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
       });
+      if (res.status === 401) {
+        router.replace('/admin/login');
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '태그 삭제에 실패했습니다.');
 
@@ -109,5 +120,5 @@ export default function TagsPage() {
         ))}
       </ul>
     </div>
-  );
+);
 }
