@@ -1,5 +1,3 @@
-# netlify.toml
-
 [build]
   command   = "npm run build"
   publish   = ".next"
@@ -30,7 +28,7 @@
 
 # API 경로를 Netlify Functions로 리디렉션 (단일 admin 함수 사용)
 [[redirects]]
-  from = "/api/admin/*"
+  from = "/api/admin/login"
   to   = "/.netlify/functions-internal/admin"
   status = 200
   force = true
