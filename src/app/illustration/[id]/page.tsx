@@ -1,4 +1,4 @@
-// src/app/illustration/[id]/page.tsx
+// 파일 경로: src/app/illustration/[id]/page.tsx
 
 'use client';
 
@@ -8,12 +8,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useDownloadLimit } from '@/hooks/useDownloadLimit';
 import Banner from '@/components/Banner';
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaShareAlt,
-  FaCoffee,
-} from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaShareAlt, FaCoffee } from 'react-icons/fa';
 
 interface IllustrationData {
   id: number;
@@ -47,10 +42,9 @@ export default function IllustrationPage() {
   const [tagObjs, setTagObjs] = useState<Tag[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [buttonsEnabled, setButtonsEnabled] = useState(false);
-  const { remaining, incrementLocalCount } = useDownloadLimit(
-    illustrationId
-  );
+  const { remaining, incrementLocalCount } = useDownloadLimit(illustrationId);
 
+  // 1) 상세 데이터 로드
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -67,6 +61,7 @@ export default function IllustrationPage() {
     })();
   }, [id]);
 
+  // 2) 연관 이미지 로드
   useEffect(() => {
     if (!data?.collection_id) return;
     (async () => {
@@ -82,6 +77,7 @@ export default function IllustrationPage() {
     })();
   }, [data, illustrationId]);
 
+  // 3) 모달 내 버튼 활성 지연
   useEffect(() => {
     if (showModal && remaining > 0) {
       setButtonsEnabled(false);
@@ -90,6 +86,7 @@ export default function IllustrationPage() {
     }
   }, [showModal, remaining]);
 
+  // 4) 다운로드 핸들러
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
     if (remaining <= 0) {
@@ -97,7 +94,7 @@ export default function IllustrationPage() {
       return;
     }
 
-    // 1) RPC 호출 및 URL 획득
+    // 4-1) RPC 호출 및 URL 획득
     const rpcRes = await fetch(
       `/api/download?illustration=${illustrationId}&format=${fmt}&mode=signed`
     );
@@ -108,7 +105,7 @@ export default function IllustrationPage() {
     }
     const signedUrl = rpcJson.url as string;
 
-    // 2) 파일 데이터 가져오기
+    // 4-2) 파일 다운로드 실행
     const fileRes = await fetch(signedUrl);
     if (!fileRes.ok) {
       alert('다운로드 실패');
@@ -116,8 +113,6 @@ export default function IllustrationPage() {
     }
     const blob = await fileRes.blob();
     const objUrl = URL.createObjectURL(blob);
-
-    // 3) 다운로드 실행
     const a = document.createElement('a');
     a.href = objUrl;
     a.download = `${illustrationId}.${fmt}`;
@@ -126,16 +121,16 @@ export default function IllustrationPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(objUrl);
 
-    // 4) 로컬 카운트 업데이트
+    // 4-3) 로컬 카운트 증가
     incrementLocalCount();
   };
 
-  if (!data)
-    return <div className="p-8 text-center">Loading…</div>;
+  if (!data) return <div className="p-8 text-center">Loading…</div>;
 
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 items-start">
+        {/* 이미지 프리뷰 (우클릭 차단 레이어 포함) */}
         <div className="md:w-1/2 w-full">
           <div className="relative">
             <img
@@ -143,7 +138,6 @@ export default function IllustrationPage() {
               alt={data.title}
               className="w-full h-auto rounded"
             />
-            {/* 우클릭 차단 레이어 */}
             <div
               className="absolute inset-0"
               onContextMenu={(e) => e.preventDefault()}
@@ -164,12 +158,14 @@ export default function IllustrationPage() {
           )}
         </div>
 
+        {/* 정보 & 다운로드 섹션 */}
         <div className="md:w-1/2 w-full space-y-4">
           <h1 className="text-3xl font-bold">{data.title}</h1>
           {data.description && (
             <p className="text-gray-700">{data.description}</p>
           )}
 
+          {/* Download 버튼 */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowModal(true)}
@@ -193,6 +189,7 @@ export default function IllustrationPage() {
             </a>
           </div>
 
+          {/* 라이선스 안내 */}
           <div className="text-sm text-gray-600 space-y-1">
             <p>* Up to 10 free downloads per day. Remaining: {remaining}</p>
             <p>* Commercial use allowed.</p>
@@ -209,6 +206,7 @@ export default function IllustrationPage() {
             </p>
           </div>
 
+          {/* 소셜 공유 버튼 */}
           <div className="flex gap-4 mt-4">
             <button
               onClick={() =>
@@ -237,27 +235,47 @@ export default function IllustrationPage() {
               <FaTwitter size={20} />
             </button>
             <button
-              onClick={() =>
-                navigator.share?.({ url: window.location.href })
-              }
+              onClick={() => navigator.share?.({ url: window.location.href })}
               className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
               <FaShareAlt size={20} />
             </button>
           </div>
 
+          {/* 배너 */}
           <div className="mt-6">
             <Banner />
           </div>
         </div>
       </div>
 
+      {/* 연관 이미지 섹션 */}
+      {related.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">이 컬렉션의 다른 이미지</h2>
+          <div className="grid grid-cols-5 gap-4">
+            {related.map((img) => (
+              <div key={img.id} className="relative">
+                <img
+                  src={toCdnUrl(img.image_url)}
+                  alt=""
+                  className="w-full h-auto rounded"
+                />
+                <div
+                  className="absolute inset-0"
+                  onContextMenu={(e) => e.preventDefault()}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 다운로드 포맷 선택 모달 */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="relative bg-white p-6 rounded shadow max-w-sm w-full">
-            <h2 className="text-lg font-bold mb-2 text-left">
-              Select file format
-            </h2>
+            <h2 className="text-lg font-bold mb-2 text-left">Select file format</h2>
             <hr className="border-gray-300 mb-4" />
 
             {remaining > 0 ? (
