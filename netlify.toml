@@ -1,6 +1,6 @@
 [build]
-  command   = "npm run build"
-  publish   = ".next"
+  command = "npm run build"
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -13,10 +13,10 @@
     Access-Control-Allow-Headers = "Content-Type, Authorization"
 
 [[redirects]]
-  from    = "/cdn/illustrations/images/*"
-  to      = "https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/illustrations/images/:splat"
-  status  = 200
-  force   = true
+  from   = "/cdn/illustrations/images/*"
+  to     = "https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/illustrations/images/:splat"
+  status = 200
+  force  = true
 
 [[headers]]
   for = "/cdn/illustrations/images/*"

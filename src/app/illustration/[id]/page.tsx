@@ -1,3 +1,5 @@
+// src/app/illustration/[id]/page.tsx
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -6,7 +8,12 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useDownloadLimit } from '@/hooks/useDownloadLimit';
 import Banner from '@/components/Banner';
-import { FaFacebookF, FaTwitter, FaShareAlt, FaCoffee } from 'react-icons/fa';
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaShareAlt,
+  FaCoffee,
+} from 'react-icons/fa';
 
 interface IllustrationData {
   id: number;
@@ -27,7 +34,6 @@ interface Tag {
   name: string;
 }
 
-// raw Supabase URL → 로컬/Prod 모두 /cdn/... 로 매핑해 주는 헬퍼
 function toCdnUrl(raw: string) {
   const m = raw.match(/public\/illustrations\/images\/(.+)$/);
   return m ? `/cdn/illustrations/images/${m[1]}` : raw;
@@ -41,9 +47,10 @@ export default function IllustrationPage() {
   const [tagObjs, setTagObjs] = useState<Tag[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [buttonsEnabled, setButtonsEnabled] = useState(false);
-  const { remaining, recordDownload } = useDownloadLimit(illustrationId);
+  const { remaining, incrementLocalCount } = useDownloadLimit(
+    illustrationId
+  );
 
-  // load illustration & tags
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -60,7 +67,6 @@ export default function IllustrationPage() {
     })();
   }, [id]);
 
-  // load related
   useEffect(() => {
     if (!data?.collection_id) return;
     (async () => {
@@ -76,7 +82,6 @@ export default function IllustrationPage() {
     })();
   }, [data, illustrationId]);
 
-  // interstitial timer
   useEffect(() => {
     if (showModal && remaining > 0) {
       setButtonsEnabled(false);
@@ -87,38 +92,66 @@ export default function IllustrationPage() {
 
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
-    if (remaining <= 0) return;
-    await recordDownload(fmt);
-    if (!data) return;
-    // 다운로드는 원본 Supabase URL 에서
-    const resp = await fetch(data.image_url);
-    if (!resp.ok) return alert('Failed to fetch file.');
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
+    if (remaining <= 0) {
+      alert('오늘 다운로드 한도(10회)를 모두 사용하셨습니다.');
+      return;
+    }
+
+    // 1) RPC 호출 및 URL 획득
+    const rpcRes = await fetch(
+      `/api/download?illustration=${illustrationId}&format=${fmt}&mode=signed`
+    );
+    const rpcJson = await rpcRes.json();
+    if (!rpcRes.ok) {
+      alert(rpcJson.error || '다운로드 실패');
+      return;
+    }
+    const signedUrl = rpcJson.url as string;
+
+    // 2) 파일 데이터 가져오기
+    const fileRes = await fetch(signedUrl);
+    if (!fileRes.ok) {
+      alert('다운로드 실패');
+      return;
+    }
+    const blob = await fileRes.blob();
+    const objUrl = URL.createObjectURL(blob);
+
+    // 3) 다운로드 실행
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `illustration_${data.id}.${fmt}`;
+    a.href = objUrl;
+    a.download = `${illustrationId}.${fmt}`;
     document.body.appendChild(a);
     a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objUrl);
+
+    // 4) 로컬 카운트 업데이트
+    incrementLocalCount();
   };
 
-  if (!data) return <div>Loading...</div>;
+  if (!data)
+    return <div className="p-8 text-center">Loading…</div>;
 
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Image + Tags */}
         <div className="md:w-1/2 w-full">
-          <img
-            src={toCdnUrl(data.image_url)}
-            alt={data.title}
-            className="w-full h-auto rounded"
-          />
+          <div className="relative">
+            <img
+              src={toCdnUrl(data.image_url)}
+              alt={data.title}
+              className="w-full h-auto rounded"
+            />
+            {/* 우클릭 차단 레이어 */}
+            <div
+              className="absolute inset-0"
+              onContextMenu={(e) => e.preventDefault()}
+            />
+          </div>
           {tagObjs.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {tagObjs.map(tag => (
+              {tagObjs.map((tag) => (
                 <Link
                   key={tag.id}
                   href={`/categories/${tag.id}`}
@@ -131,18 +164,21 @@ export default function IllustrationPage() {
           )}
         </div>
 
-        {/* Info + Download */}
         <div className="md:w-1/2 w-full space-y-4">
           <h1 className="text-3xl font-bold">{data.title}</h1>
           {data.description && (
             <p className="text-gray-700">{data.description}</p>
           )}
 
-          {/* Buttons */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              disabled={remaining <= 0}
+              className={`px-4 py-2 text-white rounded ${
+                remaining > 0
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
             >
               Download
             </button>
@@ -157,14 +193,13 @@ export default function IllustrationPage() {
             </a>
           </div>
 
-          {/* License & Info */}
-          <div className="text-left text-sm text-gray-600 space-y-1">
-            <p>* Up to 10 free downloads per day. Remaining downloads: {remaining}</p>
+          <div className="text-sm text-gray-600 space-y-1">
+            <p>* Up to 10 free downloads per day. Remaining: {remaining}</p>
             <p>* Commercial use allowed.</p>
             <p>* Modifications and derivative works permitted.</p>
             <p>* Resale or redistribution prohibited.</p>
             <p>
-              * Attribution optional but appreciated.{' '}
+              * Attribution optional.{' '}
               <Link
                 href="/info/terms"
                 className="underline text-blue-600 hover:text-blue-800"
@@ -174,7 +209,6 @@ export default function IllustrationPage() {
             </p>
           </div>
 
-          {/* Social Share Buttons */}
           <div className="flex gap-4 mt-4">
             <button
               onClick={() =>
@@ -188,9 +222,7 @@ export default function IllustrationPage() {
               className="flex items-center gap-2 px-3 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
             >
               <FaFacebookF size={20} />
-              <span className="sr-only">Share on Facebook</span>
             </button>
-
             <button
               onClick={() =>
                 window.open(
@@ -203,26 +235,23 @@ export default function IllustrationPage() {
               className="flex items-center gap-2 px-3 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
             >
               <FaTwitter size={20} />
-              <span className="sr-only">Tweet this</span>
             </button>
-
             <button
-              onClick={() => navigator.share?.({ url: window.location.href })}
+              onClick={() =>
+                navigator.share?.({ url: window.location.href })
+              }
               className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
               <FaShareAlt size={20} />
-              <span className="sr-only">Share</span>
             </button>
           </div>
 
-          {/* Banner */}
           <div className="mt-6">
             <Banner />
           </div>
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="relative bg-white p-6 rounded shadow max-w-sm w-full">
@@ -234,20 +263,8 @@ export default function IllustrationPage() {
             {remaining > 0 ? (
               <>
                 <p className="mb-4 text-sm text-gray-600 text-left">
-                  You may download up to 10 files per day. Please select only
-                  the images you need.
+                  Up to 10 files/day. Please choose.
                 </p>
-
-                {/* AdSense Banner */}
-                <div className="w-full mb-4">
-                  <img
-                    src="/adsense-banner-placeholder.png"
-                    alt="Advertisement"
-                    className="w-full h-auto rounded"
-                  />
-                </div>
-
-                {/* Download Buttons */}
                 <div className="flex gap-4 mb-4">
                   <button
                     onClick={() => handleDownload('svg')}
@@ -275,12 +292,10 @@ export default function IllustrationPage() {
               </>
             ) : (
               <p className="text-center text-gray-600">
-                You have reached your download limit for today.<br />
-                Please come back tomorrow.
+                Download limit reached. Please come back tomorrow.
               </p>
             )}
 
-            {/* Close */}
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -289,26 +304,6 @@ export default function IllustrationPage() {
             </button>
           </div>
         </div>
-      )}
-
-      {/* Related Images */}
-      {related.length > 0 && (
-        <section className="mt-16">
-          <h2 className="text-xl font-semibold mb-4">
-            Other images in this collection
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {related.map(img => (
-              <Link key={img.id} href={`/illustration/${img.id}`}>
-                <img
-                  src={toCdnUrl(img.image_url)}
-                  alt=""
-                  className="w-full h-40 object-cover rounded hover:opacity-90 transition"
-                />
-              </Link>
-            ))}
-          </div>
-        </section>
       )}
     </main>
   );
