@@ -9,34 +9,31 @@ interface IllustrationCardProps {
   imageUrl: string;
 }
 
-export default function IllustrationCard({ id, title, imageUrl }: IllustrationCardProps) {
+// CDN 캐싱 URL 변환 함수
+function toCdnUrl(raw: string) {
+  const m = raw.match(/public\/illustrations\/images\/(.+)$/);
+  return m ? `/cdn/illustrations/images/${m[1]}` : raw;
+}
+
+export default function IllustrationCard({
+  id,
+  title,
+  imageUrl,
+}: IllustrationCardProps) {
   const router = useRouter();
 
   return (
     <div
-      onClick={() => router.push(`/illustration/${id}?id=${id}`)}
-      style={{
-        cursor: 'pointer',
-        border: '1px solid #eee',
-        borderRadius: 4,
-        overflow: 'hidden',
-      }}
+      style={{ cursor: 'pointer' }}
+      onClick={() => router.push(`/illustration/${id}`)}
     >
-      {/* 고정 높이 컨테이너: 작으면 가운데, 크면 축소/확대 */}
-      <div
-        style={{
-          height: 200,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#ffffff',
-        }}
-      >
+      <div style={{ width: '100%', height: 200, overflow: 'hidden' }}>
         <img
-          src={imageUrl}
+          src={toCdnUrl(imageUrl)}
           alt={title}
+          onContextMenu={(e) => e.preventDefault()}
           style={{
-            maxWidth: '100%',
+            width: '100%',
             maxHeight: '100%',
             objectFit: 'contain',
           }}
@@ -44,7 +41,16 @@ export default function IllustrationCard({ id, title, imageUrl }: IllustrationCa
       </div>
 
       <div style={{ padding: '0.5rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: '1rem',
+            lineHeight: 1.2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {title}
         </h2>
       </div>
