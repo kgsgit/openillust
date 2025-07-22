@@ -27,7 +27,7 @@ export default async function PopularPage() {
   const items: Illustration[] = data || [];
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '1rem 1rem' }}>
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '3rem 2rem' }}>
       {/* 헤더와 동일한 폭 및 여유 */}
       <h1 style={{ margin: '1rem 0 3rem' }} className="text-3xl font-bold">
         Popular Illustrations

@@ -47,7 +47,7 @@ export default function Header() {
       <div className="max-w-screen-xl mx-auto flex items-center justify-between flex-nowrap px-4 py-3">
         {/* 로고 */}
         <Link href="/" className="flex-shrink-0 mr-4">
-          <img src="/logo.png" alt="Openillust" className="h-10 w-auto object-contain" />
+          <img src="/logo.png" alt="Openillust" className="h-8 w-auto object-contain" />
         </Link>
 
         {/* 컬렉션 슬라이더 */}

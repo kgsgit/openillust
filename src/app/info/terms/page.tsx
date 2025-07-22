@@ -1,76 +1,93 @@
 // src/app/info/terms/page.tsx
+import Image from "next/image";
+
 export const metadata = {
   title: "Terms of Service | Openillust",
-  description: "The rules for using illustrations and this website.",
+  description: "Terms of using the Openillust illustration service.",
 };
 
 export default function TermsPage() {
   return (
-    <main className="prose prose-gray mx-auto w-full max-w-4xl px-6 lg:px-8 py-16">
-      <h1>Terms&nbsp;of&nbsp;Service</h1>
+    <main className="mx-auto w-full max-w-3xl px-6 lg:px-8 py-16">
+      {/* HEADER */}
+      <section className="text-center mb-16">
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">
+          Terms of Service
+        </h1>
+        <p className="text-lg text-gray-600 mb-10 leading-relaxed">
+          By using Openillust, you agree to the terms outlined below. We aim to keep things simple and fair.
+        </p>
+        <Image
+          src="/about/6.svg"
+          alt="Terms doodle"
+          width={200}
+          height={200}
+          className="mx-auto mt-4"
+        />
+      </section>
 
-      <p>
-        Welcome to Openillust. By accessing or downloading any illustration
-        (“Content”) from this website, you agree to the following terms. If you
-        do not accept them, please refrain from using the service.
-      </p>
+      {/* TERMS CONTENT */}
+      <section className="bg-gray-50 rounded-xl px-6 py-10 text-[17px] leading-relaxed space-y-10">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">1. Service Overview</h2>
+          <p>
+            Openillust offers free curated illustrations for personal and commercial use. No sign-up is required,
+            and content is delivered as-is.
+          </p>
+        </div>
 
-      <h2>1. License</h2>
-      <p>
-        All Content is released under <strong>Creative Commons&nbsp;BY&nbsp;4.0</strong>.
-        You may copy, remix, transform, and build upon the material—even for commercial
-        purposes—provided you give appropriate credit or a link to Openillust. Attribution
-        is appreciated but <em>not</em> mandatory.
-      </p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">2. Acceptable Use</h2>
+          <p>
+            You may download and use illustrations in websites, apps, slides, educational materials, and
+            similar contexts. Redistribution or resale of the illustrations themselves is not permitted.
+          </p>
+        </div>
 
-      <h2>2. Prohibited uses</h2>
-      <ul>
-        <li>Re-selling or re-licensing the unmodified files on stock sites.</li>
-        <li>Portraying the artwork as trademarked or exclusively yours.</li>
-        <li>Using the site to distribute malware, spam, or illegal content.</li>
-      </ul>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">3. Prohibited Activities</h2>
+          <ul className="list-disc list-inside space-y-2">
+            <li>Repackaging or selling illustrations as-is</li>
+            <li>Using content for deceptive, hateful, or unlawful purposes</li>
+            <li>Scraping or bulk downloading without permission</li>
+          </ul>
+        </div>
 
-      <h2>3. Ownership</h2>
-      <p>
-        Openillust retains all intellectual-property rights not expressly
-        granted in these terms. Logos and brand assets remain the property of
-        their respective owners.
-      </p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">4. Limitation of Liability</h2>
+          <p>
+            Openillust is provided without warranties. We are not liable for any damages arising from the use
+            of the site or its content.
+          </p>
+        </div>
 
-      <h2>4. Disclaimer of warranties</h2>
-      <p>
-        The website and Content are provided “as is.” We give no guarantee that
-        files will meet your requirements, be error-free, or always stay
-        online. Use them at your own risk.
-      </p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">5. Copyright & Ownership</h2>
+          <p>
+            All illustrations are original works created by our team. You may use them freely within the permitted
+            scope, but the copyright remains with Openillust.
+          </p>
+        </div>
 
-      <h2>5. Limitation of liability</h2>
-      <p>
-        To the maximum extent permitted by law, Openillust shall not be liable
-        for any indirect or consequential damages arising from your use of the
-        site or Content.
-      </p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">6. Changes to Terms</h2>
+          <p>
+            We may update these terms to reflect changes in service. The “Last updated” date will show the
+            most recent revision.
+          </p>
+          <p className="text-sm text-gray-500 mt-4">Last updated: July 9, 2025</p>
+        </div>
 
-      <h2>6. Service changes</h2>
-      <p>
-        We may update, suspend, or discontinue parts of the site at any
-        time without notice. Updated terms will be posted here and take effect
-        immediately.
-      </p>
-
-      <h2>7. Governing law</h2>
-      <p>
-        These terms are governed by the laws of the Republic of Korea. Any
-        disputes shall be settled in the courts of Seoul.
-      </p>
-
-      <h2>8. Contact</h2>
-      <p>
-        Questions? Reach us at{" "}
-        <a href="mailto:support@openillust.com">support@openillust.com</a>.
-      </p>
-
-      <p className="text-sm text-gray-500">Last updated: 09&nbsp;Jul&nbsp;2025</p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">7. Contact</h2>
+          <p>
+            Questions or concerns? Email us at{" "}
+            <a href="mailto:support@openillust.com" className="underline">
+              support@openillust.com
+            </a>.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }

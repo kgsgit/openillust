@@ -21,9 +21,7 @@ export default function Footer() {
           <Link href="/info/contact" className="hover:underline">
             Contact
           </Link>
-          <Link href="/info/sponsor" className="hover:underline">
-            Sponsor&nbsp;Us
-          </Link>
+       
         </nav>
 
         {/* 저작권·고지 */}

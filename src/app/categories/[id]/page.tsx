@@ -58,7 +58,7 @@ export default async function CategoryDetailPage({
   const totalPages = Math.ceil(totalItems / perPage);
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '1rem' }}>
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
       {/* 제목 */}
       <h1 className="text-3xl font-bold my-8">Categories</h1>
 

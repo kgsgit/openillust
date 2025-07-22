@@ -27,15 +27,16 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '1rem' }}>
-      <section style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h1>Images at Your Fingertips, Curated for Purpose</h1>
-        <p>
-          Openillust is not just a repository of images. We select only those you can actually use, without unnecessary repetition.
-          Each illustration is chosen and refined according to rigorous criteria, aiming to be a quiet tool that doesn’t hinder your creativity.
-          No complex requirements—just the images you need, ready to use.
-        </p>
-      </section>
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '4rem' }}>
+    <section style={{ textAlign: 'center', marginBottom: '2rem' }}>
+  <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>
+   Not just more images. Only the right ones.
+  </h1>
+  <p style={{ maxWidth: '600px', margin: '1rem auto 0', fontSize: '1.125rem', color: '#4B5563' }}>
+    No clutter—just ready-to-use illustrations, instantly.
+  </p>
+</section>
+
       <section>
         <div
           style={{

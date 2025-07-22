@@ -1,78 +1,90 @@
-// src/app/info/policy/page.tsx
+import Image from "next/image";
+
 export const metadata = {
   title: "Privacy Policy | Openillust",
-  description: "How we collect and use data at Openillust.",
+  description: "How Openillust handles user data and cookies.",
 };
 
-export default function PolicyPage() {
+export default function PrivacyPage() {
   return (
-    <main className="prose prose-gray mx-auto w-full max-w-4xl px-6 lg:px-8 py-16">
-      <h1>Privacy&nbsp;Policy</h1>
+    <main className="mx-auto w-full max-w-3xl px-6 lg:px-8 py-16">
+      {/* HEADER */}
+      <section className="text-center mb-16">
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">
+          Privacy Policy
+        </h1>
+        <p className="text-lg text-gray-600 mb-10 leading-relaxed">
+          Openillust keeps data collection to the bare minimum. We don’t require sign-ups
+          or store personal profiles. The few details we keep help us run the site smoothly.
+        </p>
+        <Image
+          src="/about/5.svg"
+          alt="Croissant doodle"
+          width={200}
+          height={200}
+          className="mx-auto mt-4"
+        />
+      </section>
 
-      <p>
-        Openillust keeps data collection to the bare minimum. We do not require
-        sign-ups or store personal profiles. The few details we keep help us run
-        the site smoothly and improve the artwork you see.
-      </p>
+      {/* POLICY CONTENT */}
+      <section className="bg-gray-50 rounded-xl px-6 py-10 text-[17px] leading-relaxed space-y-10">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">1. What we collect</h2>
+          <ul className="space-y-3">
+            <li>
+              <strong>Server logs:</strong> IP address, browser type, timestamp, and visited pages.
+              Stored temporarily for security and diagnostics.
+            </li>
+            <li>
+              <strong>Download counts:</strong> Collected per artwork, never linked to individual identity.
+            </li>
+            <li>
+              <strong>Cookies:</strong> Used for basic analytics and ad delivery. No tracking pixels or fingerprinting.
+            </li>
+          </ul>
+        </div>
 
-      <h2>1. What we collect</h2>
-      <ul>
-        <li>
-          <strong>Server logs</strong> — IP address, browser type, time stamp,
-          and the pages you visit. Kept for 30 days for security and analytics.
-        </li>
-        <li>
-          <strong>Download counts</strong> — summed per artwork, never tied to
-          a personal identity.
-        </li>
-        <li>
-          <strong>Cookies</strong> — small files set by Google&nbsp;AdSense and
-          basic analytics; no tracking pixels or fingerprinting scripts.
-        </li>
-      </ul>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">2. How we use that data</h2>
+          <ul className="space-y-3 list-disc list-inside">
+            <li>To monitor site performance and prevent abuse</li>
+            <li>To understand popular content and improve illustration planning</li>
+            <li>To display minimal, contextual ads and keep the service free</li>
+          </ul>
+        </div>
 
-      <h2>2. How we use that data</h2>
-      <ul>
-        <li>To protect the site from abuse and diagnose errors.</li>
-        <li>To surface popular illustrations and plan new collections.</li>
-        <li>
-          To display contextual ads via Google&nbsp;AdSense and keep the service
-          free.
-        </li>
-      </ul>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">3. Your choices</h2>
+          <ul className="space-y-3">
+            <li>You may block cookies in your browser—core features still work.</li>
+            <li>
+              You can request log deletion related to your IP by emailing us at{" "}
+              <a href="mailto:openillust@gmail.com" className="underline">
+                openillust@gmail.com
+              </a>.
+            </li>
+          </ul>
+        </div>
 
-      <h2>3. Third-party services</h2>
-      <p>
-        We rely on:
-        <br />
-        • <strong>Supabase</strong> for database &amp; storage<br />
-        • <strong>Google&nbsp;AdSense</strong> for ads<br />
-        • <strong>Vercel&nbsp;Analytics</strong> for anonymous traffic stats
-      </p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">4. Data security</h2>
+          <p>
+            All traffic is encrypted via HTTPS. Server logs and data are stored securely
+            and only accessible to essential personnel.
+          </p>
+        </div>
 
-      <h2>4. Your choices</h2>
-      <ul>
-        <li>You can block cookies in your browser—core features still work.</li>
-        <li>
-          You may request log deletion tied to your IP via
-          <a href="mailto:support@openillust.com">&nbsp;support@openillust.com</a>.
-        </li>
-      </ul>
-
-      <h2>5. Data security</h2>
-      <p>
-        All traffic is served over HTTPS. Access to raw logs and databases is
-        restricted to the core team and protected with two-factor
-        authentication.
-      </p>
-
-      <h2>6. Policy updates</h2>
-      <p>
-        We revise this page when practices change. The “Last updated” date moves
-        accordingly.
-      </p>
-
-      <p className="text-sm text-gray-500">Last updated: 09 Jul 2025</p>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">5. Policy updates</h2>
+          <p>
+            This policy may change as our service evolves. The “Last updated” date will reflect
+            the latest revision.
+          </p>
+          <p className="text-sm text-gray-500 mt-4">
+            Last updated: July 9, 2025
+          </p>
+        </div>
+      </section>
     </main>
   );
 }

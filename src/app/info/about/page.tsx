@@ -1,24 +1,20 @@
-// src/app/info/about/page.tsx
 import Image from "next/image";
 
 export const metadata = {
   title: "About | Openillust",
-  description: "Learn what drives Openillust and how to use it.",
+  description: "What Openillust is, how it works, and how to use it.",
 };
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 lg:px-8 py-16">
-      {/* HERO ●────────────────────────── */}
-      <section className="text-center space-y-4 mb-20">
-        <h1 className="text-4xl font-extrabold tracking-tight">
-          The image you need,<br className="hidden md:block" /> exactly when you
-          need it.
+    <main className="mx-auto w-full max-w-4xl px-6 lg:px-8 py-16 space-y-20">
+      {/* HERO */}
+      <section className="text-center mb-12">
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">
+          Openillust is quiet by design.
         </h1>
-        <p className="text-lg text-gray-600">
-          Discover visuals that spark fresh ideas without slowing you down. One
-          click, zero fuss—curated illustrations that slip effortlessly into any
-          project.
+        <p className="text-lg text-gray-600 mb-8">
+          No logins. No clutter. Just illustrations—ready when you are.
         </p>
         <Image
           src="/about/1.svg"
@@ -26,128 +22,112 @@ export default function AboutPage() {
           width={320}
           height={320}
           priority
-          className="mx-auto mt-8"
+          className="mx-auto mt-12"
         />
       </section>
 
-      {/* EXPERIENCES ●──────────────────── */}
-      <section className="prose prose-gray lg:prose-lg mx-auto mb-20">
-        <h2>Three things you’ll feel here</h2>
+      {/* WHAT IS OPENILLUST */}
+      <section className="bg-gray-50 rounded-xl px-6 py-10">
+        <h2 className="text-2xl font-semibold tracking-tight mb-4">What is Openillust?</h2>
+        <p className="mb-4">
+          Openillust is a free illustration curation platform designed for simplicity and usefulness.
+          Rather than overwhelming you with options, we focus on clarity—delivering visuals that serve
+          a purpose, with consistency and care.
+        </p>
+        <p>
+          Each image is generated internally, reviewed by hand, and grouped into collections for visual consistency.
+          You’ll find cohesive styles across themes, built to fit slides, apps, or social designs without extra editing.
+        </p>
+      </section>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <article className="p-6 border rounded-lg shadow-sm hover:shadow-md transition">
-            <h3 className="m-0">Concept&nbsp;Select</h3>
-            <p>
-              Cohesive series from each artist—pick a collection and your style
-              is set.
-            </p>
-          </article>
-          <article className="p-6 border rounded-lg shadow-sm hover:shadow-md transition">
-            <h3 className="m-0">Style&nbsp;Spectrum</h3>
-            <p>
-              From pen drawings to flat vectors and minimal graphics—use what
-              fits, keep the overall harmony.
-            </p>
-          </article>
-          <article className="p-6 border rounded-lg shadow-sm hover:shadow-md transition">
-            <h3 className="m-0">Safety&nbsp;&amp;&nbsp;Trust</h3>
-            <p>
-              Google-vetted, ad-light, HTTPS everywhere. Download with peace of
-              mind.
-            </p>
-          </article>
+      {/* DOWNLOAD LIMIT */}
+      <section className="bg-gray-50 rounded-xl px-6 py-10">
+        <h2 className="text-2xl font-semibold tracking-tight mb-4">Daily download limit</h2>
+        <p className="mb-2">
+          To keep the service fast and reliable for everyone, downloads are limited to
+          <strong> 10 illustrations per day</strong>. No sign-up is required.
+        </p>
+        <p className="text-gray-600">
+          This limit may be adjusted in the future as the service evolves.
+        </p>
+      </section>
+
+      {/* HOW TO USE */}
+      <section className="bg-gray-50 rounded-xl px-6 py-10">
+        <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
+          <Image
+            src="/about/3.svg"
+            alt="Parent strolling"
+            width={200}
+            height={200}
+            className="w-44"
+          />
+          <h2 className="text-2xl font-semibold tracking-tight">How to use</h2>
         </div>
-      </section>
-
-      {/* WHY ●──────────────────────────── */}
-      <section className="prose prose-gray lg:prose-lg mx-auto mb-20">
-        <h2>Why Openillust?</h2>
-        <Image
-          src="/about/2.svg"
-          alt="Designer at desk"
-          width={260}
-          height={260}
-          className="float-right ml-6 mb-4 w-52"
-        />
-        <h3>Concept Select</h3>
-        <p>
-          Browse series crafted by the same hand. Whether you’re building slides
-          or an app UI, keep that &ldquo;different yet consistent&rdquo; vibe
-          with zero extra effort.
-        </p>
-
-        <h3>Style Spectrum</h3>
-        <p>
-          Need a crisp outline? A playful flat scene? A minimal icon? Grab the
-          tone you want—our visual grid stays balanced either way.
-        </p>
-
-        <h3>Safety &amp; Trust</h3>
-        <p>
-          Every asset clears an internal cleanliness check before going live.
-          HTTPS keeps transfers secure, and we keep ads sparse and unobtrusive.
-        </p>
-      </section>
-
-      {/* HOW TO USE ●───────────────────── */}
-      <section className="prose prose-gray lg:prose-lg mx-auto mb-20">
-        <Image
-          src="/about/3.svg"
-          alt="Parent strolling"
-          width={260}
-          height={260}
-          className="float-left mr-6 mb-4 w-52"
-        />
-        <h2>How to use it in three beats</h2>
-        <ol>
+        <ol className="list-decimal list-inside space-y-2">
           <li>
-            <strong>Search &amp; explore</strong> — tags, categories,
-            collections.
+            <strong>Browse</strong> — use tags, categories, or collections.
           </li>
           <li>
-            <strong>Preview</strong> — tap once for a closer look and specs.
+            <strong>Preview</strong> — click any thumbnail to view details.
           </li>
           <li>
-            <strong>Instant download</strong> — snag SVG or PNG, edit freely.
+            <strong>Download</strong> — choose SVG or PNG and edit freely.
           </li>
         </ol>
       </section>
 
-      {/* LICENSE ●──────────────────────── */}
-      <section className="prose prose-gray lg:prose-lg mx-auto mb-20">
-        <h2>License &amp; usage</h2>
-        <ul>
+      {/* LICENSE */}
+      <section className="bg-gray-50 rounded-xl px-6 py-10">
+        <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
+          <Image
+            src="/about/2.svg"
+            alt="Designer at desk"
+            width={200}
+            height={200}
+            className="w-44"
+          />
+          <h2 className="text-2xl font-semibold tracking-tight">License &amp; usage</h2>
+        </div>
+        <ul className="list-disc list-inside space-y-2">
           <li>
-            <strong>CC BY 4.0</strong> — commercial, personal, remix welcomed.
+            <strong>CC BY 4.0</strong> — personal and commercial use, remixing and modification allowed.
           </li>
-          <li>No mandatory credit, though a shout-out is always nice.</li>
-          <li>Reselling the raw files themselves is off-limits.</li>
+          <li>
+            Attribution is optional, but appreciated.
+          </li>
+          <li>
+            Redistribution or resale of the raw files is not permitted.
+          </li>
         </ul>
-       
       </section>
 
-      {/* CONTACT ●──────────────────────── */}
-      <section className="prose prose-gray lg:prose-lg mx-auto text-center">
+      {/* CONTACT */}
+      <section className="text-center space-y-4">
         <Image
           src="/about/5.svg"
           alt="Croissant doodle"
           width={200}
           height={200}
-          className="mx-auto mb-6"
+          className="mx-auto"
         />
-        <h2>Contact us</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Contact</h2>
         <p>
-          <strong>Email</strong> :{" "}
-          <a href="mailto:support@openillust.com">support@openillust.com</a>
-          <br />
-          <strong>Partner with us</strong> : <a href="/info/sponsor">Sponsor&nbsp;page</a>
-          <br />
-          <strong>Spot an issue?</strong> Use the “Report” link under any image
-          or drop us a line.
+          If you have a question that really can’t wait,  
+          you can reach us at <br />
+          <a href="mailto:openillust@gmail.com">openillust@gmail.com</a>.
         </p>
-        <p className="!mt-10">
-          Grab what you need and sprint to your next idea—we’ll be cheering
-          quietly in the background.
+        <p className="text-sm text-gray-500">
+          Please note that responses may take some time, and we may not reply to all messages.
+        </p>
+      </section>
+
+      {/* SLOGAN */}
+      <section className="pt-8 text-center">
+        <p className="text-2xl font-semibold leading-snug text-gray-700 max-w-xl mx-auto">
+          Take what you need and carry on—
+          <br className="hidden sm:inline" />
+          quiet tools make room for big ideas.
         </p>
       </section>
     </main>
