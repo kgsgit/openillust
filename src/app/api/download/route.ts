@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // 파라미터 파싱
+  // 1) 파라미터 파싱
   const url = new URL(request.url);
   const params = url.searchParams;
   const idParam = params.get('illustration');
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid illustration ID' }, { status: 400 });
   }
 
-  // 디버그 로그
+  // 2) 디버그 로그
   console.log('download request params:', { illustrationId, fmt, mode });
   console.log('headers:', {
     nf: request.headers.get('x-nf-client-connection-ip'),
@@ -29,20 +29,20 @@ export async function GET(request: NextRequest) {
     forwarded: request.headers.get('x-forwarded-for'),
   });
 
-  // 사용자 식별자 쿠키 확인
+  // 3) 사용자 식별자 쿠키 확인
   const userIdentifier = request.cookies.get('user_identifier')?.value;
   if (!userIdentifier) {
     return NextResponse.json({ error: 'User identifier missing' }, { status: 400 });
   }
 
-  // 클라이언트 IP 추출 (Netlify 헤더 우선)
+  // 4) 클라이언트 IP 추출 (Netlify 헤더 우선)
   const ip =
     request.headers.get('x-nf-client-connection-ip') ??
     request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 오늘자 IP별 다운로드 횟수 확인 (여전히 적용)
+  // 5) 오늘자 IP별 다운로드 횟수 확인
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { count: ipCount, error: ipError } = await supabaseAdmin
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
   }
 
-  // signed 모드일 때만 RPC 호출 (로그 삽입 + 카운트)
+  // 6) signed 모드일 때만 RPC 호출 (로그 삽입 + 카운트)
   if (mode === 'signed') {
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 일러스트 정보 조회
+  // 7) 일러스트 정보 조회
   const { data: illust, error: illError } = await supabaseAdmin
     .from('illustrations')
     .select('image_path, image_url')
@@ -79,15 +79,20 @@ export async function GET(request: NextRequest) {
   if (illError || !illust) {
     return NextResponse.json({ error: illError?.message || 'Illustration not found' }, { status: 404 });
   }
-  const path = illust.image_path!;
+  const origPath = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 파일 반환
+  // 8) PNG 포맷인 경우 경로 재설정
+  const filePath = fmt === 'png'
+    ? origPath.replace(/\.svg$/, '.png')
+    : origPath;
+
+  // 9) 파일 반환
   if (mode === 'signed') {
     const { data: signed, error: signError } = await supabaseAdmin
       .storage
       .from('illustrations-private')
-      .createSignedUrl(path, 10);
+      .createSignedUrl(filePath, 10);
     if (signError || !signed) {
       console.error('⚠️ createSignedUrl error:', signError);
       return NextResponse.json({ error: signError?.message || 'URL signing failed' }, { status: 500 });
@@ -97,7 +102,7 @@ export async function GET(request: NextRequest) {
     const { data: signed2, error: signError2 } = await supabaseAdmin
       .storage
       .from('illustrations-private')
-      .createSignedUrl(path, 300);
+      .createSignedUrl(filePath, 300);
     if (signError2 || !signed2) {
       console.error('⚠️ createSignedUrl (stream) error:', signError2);
       if (publicUrl) return NextResponse.json({ url: publicUrl });
@@ -108,7 +113,7 @@ export async function GET(request: NextRequest) {
       console.error('⚠️ upstream fetch error:', upstream.statusText);
       return NextResponse.json({ error: 'Failed to stream file' }, { status: 502 });
     }
-    const filename = path.split('/').pop() || `illustration.${fmt}`;
+    const filename = filePath.split('/').pop() || `illustration.${fmt}`;
     const headers = new Headers(upstream.headers);
     headers.set('Content-Disposition', `attachment; filename="${filename}"`);
     return new Response(upstream.body, { status: upstream.status, headers });
