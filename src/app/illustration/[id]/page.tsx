@@ -86,7 +86,7 @@ export default function IllustrationPage() {
     }
   }, [showModal, remaining]);
 
-  // 4) 다운로드 핸들러
+  // 4) 다운로드 핸들러 (SVG 직접 또는 Canvas→PNG 변환)
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
     if (remaining <= 0) {
@@ -94,7 +94,7 @@ export default function IllustrationPage() {
       return;
     }
 
-    // 4-1) RPC 호출 및 URL 획득
+    // 4-1) RPC 호출 및 서명 URL 획득
     const rpcRes = await fetch(
       `/api/download?illustration=${illustrationId}&format=${fmt}&mode=signed`
     );
@@ -105,24 +105,65 @@ export default function IllustrationPage() {
     }
     const signedUrl = rpcJson.url as string;
 
-    // 4-2) 파일 다운로드 실행
-    const fileRes = await fetch(signedUrl);
-    if (!fileRes.ok) {
-      alert('다운로드 실패');
-      return;
+    if (fmt === 'svg') {
+      // SVG 직접 다운로드
+      const fileRes = await fetch(signedUrl);
+      if (!fileRes.ok) {
+        alert('다운로드 실패');
+        return;
+      }
+      const blob = await fileRes.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = `${illustrationId}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objUrl);
+      incrementLocalCount();
+    } else {
+      // PNG 변환 다운로드
+      const fileRes = await fetch(signedUrl);
+      if (!fileRes.ok) {
+        alert('다운로드 실패');
+        return;
+      }
+      const svgText = await fileRes.text();
+      const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(pngBlob => {
+            if (pngBlob) {
+              const pngUrl = URL.createObjectURL(pngBlob);
+              const a = document.createElement('a');
+              a.href = pngUrl;
+              a.download = `${illustrationId}.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(pngUrl);
+              incrementLocalCount();
+            } else {
+              alert('PNG 변환 실패');
+            }
+          }, 'image/png');
+        }
+        URL.revokeObjectURL(svgUrl);
+      };
+      img.onerror = () => {
+        alert('PNG 변환 실패');
+        URL.revokeObjectURL(svgUrl);
+      };
+      img.src = svgUrl;
     }
-    const blob = await fileRes.blob();
-    const objUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = objUrl;
-    a.download = `${illustrationId}.${fmt}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(objUrl);
-
-    // 4-3) 로컬 카운트 증가
-    incrementLocalCount();
   };
 
   if (!data) return <div className="p-8 text-center">Loading…</div>;
