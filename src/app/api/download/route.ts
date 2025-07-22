@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // 1) 파라미터 파싱
+  // 파라미터 파싱
   const url = new URL(request.url);
   const params = url.searchParams;
   const idParam = params.get('illustration');
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid illustration ID' }, { status: 400 });
   }
 
-  // 2) 디버그 로그
+  // 디버그 로그
   console.log('download request params:', { illustrationId, fmt, mode });
   console.log('headers:', {
     nf: request.headers.get('x-nf-client-connection-ip'),
@@ -29,20 +29,20 @@ export async function GET(request: NextRequest) {
     forwarded: request.headers.get('x-forwarded-for'),
   });
 
-  // 3) 쿠키 확인
+  // 사용자 식별자 쿠키 확인
   const userIdentifier = request.cookies.get('user_identifier')?.value;
   if (!userIdentifier) {
     return NextResponse.json({ error: 'User identifier missing' }, { status: 400 });
   }
 
-  // 4) 클라이언트 IP 결정 (Netlify 헤더 우선)
+  // 클라이언트 IP 추출 (Netlify 헤더 우선)
   const ip =
     request.headers.get('x-nf-client-connection-ip') ??
     request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 5) 오늘자 IP별 다운로드 횟수 조회
+  // 오늘자 IP별 다운로드 횟수 확인 (여전히 적용)
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { count: ipCount, error: ipError } = await supabaseAdmin
@@ -56,24 +56,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
   }
 
-  // 6) signed 모드일 때만 다운로드 로그 기록 및 카운트
+  // signed 모드일 때만 RPC 호출 (로그 삽입 + 카운트)
   if (mode === 'signed') {
-    // 6-1) IP 로그는 항상 먼저 기록
-    const { error: logError } = await supabaseAdmin
-      .from('download_logs')
-      .insert({
-        illustration_id: illustrationId,
-        user_identifier: userIdentifier,
-        ip_address: ip,
-        download_type: fmt,
-      });
-    if (logError) console.error('⚠️ download_logs insert error:', logError);
-
-    // 6-2) RPC로 일일 카운트 증가
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
       p_user_identifier: userIdentifier,
       p_download_type: fmt,
+      p_ip_address: ip,
     });
     if (cntError) {
       console.error('⚠️ increment_download_count error:', cntError);
@@ -81,7 +70,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 7) 일러스트 정보 조회
+  // 일러스트 정보 조회
   const { data: illust, error: illError } = await supabaseAdmin
     .from('illustrations')
     .select('image_path, image_url')
@@ -93,7 +82,7 @@ export async function GET(request: NextRequest) {
   const path = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 8) 파일 반환 로직
+  // 파일 반환
   if (mode === 'signed') {
     const { data: signed, error: signError } = await supabaseAdmin
       .storage
