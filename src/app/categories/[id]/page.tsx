@@ -1,8 +1,8 @@
 // 파일 경로: src/app/categories/[id]/page.tsx
 
 import Link from 'next/link';
-import IllustrationCard from '@/components/IllustrationCard';
 import { supabaseAdmin } from '@/lib/supabaseAdminClient';
+import ThumbnailImage from '@/components/ThumbnailImage';
 
 type Tag = { id: number; name: string };
 type Illustration = { id: number; title: string; image_url: string };
@@ -94,12 +94,16 @@ export default async function CategoryDetailPage({
       {/* 일러스트 그리드 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
         {illustrations.map(item => (
-          <IllustrationCard
+          <Link
+            href={`/illustration/${item.id}`}
             key={item.id}
-            id={item.id}
-            title={item.title}
-            imageUrl={item.image_url}
-          />
+            className="block"
+          >
+            <ThumbnailImage src={item.image_url} alt={item.title} />
+            <div className="mt-2 text-center">
+              <h2 className="text-sm font-medium">{item.title}</h2>
+            </div>
+          </Link>
         ))}
       </div>
 

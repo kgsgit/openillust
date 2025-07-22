@@ -1,6 +1,8 @@
 // 파일 경로: src/app/collections/[id]/page.tsx
+
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
+import ThumbnailImage from '@/components/ThumbnailImage';
 
 type Collection = {
   id: number;
@@ -19,7 +21,6 @@ export default async function CollectionDetailPage(input: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ page?: string }>;
 }) {
-  // 반드시 await!
   const { id } = await input.params;
   const { page } = await input.searchParams;
 
@@ -29,7 +30,6 @@ export default async function CollectionDetailPage(input: {
   const from = (currentPage - 1) * perPage;
   const to = currentPage * perPage - 1;
 
-  // 1) 컬렉션 메타 데이터
   const { data: colData, error: colError } = await supabase
     .from('collections')
     .select('id, name, thumbnail_url, description')
@@ -40,7 +40,6 @@ export default async function CollectionDetailPage(input: {
   }
   const collection: Collection = colData;
 
-  // 2) 일러스트 목록 + 전체 개수
   const { data: illData, error: illError, count } = await supabase
     .from('illustrations')
     .select('id, title, image_url', { count: 'exact' })
@@ -57,29 +56,25 @@ export default async function CollectionDetailPage(input: {
 
   return (
     <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
-      {/* 전체 컬렉션 목록 제목 */}
       <h1 className="text-3xl font-bold my-8">Collections</h1>
 
-      {/* 선택된 컬렉션 */}
       <div className="flex items-center space-x-4 mb-8">
         {collection.thumbnail_url && (
-          <img
-            src={collection.thumbnail_url}
-            alt={collection.name}
-            className="h-12 w-12 object-cover rounded"
-          />
+          <div className="w-12 h-12 overflow-hidden rounded">
+            <ThumbnailImage
+              src={collection.thumbnail_url}
+              alt={collection.name}
+            />
+          </div>
         )}
         <div>
-          <h2 className="text-2xl font-semibold mb-1">
-            {collection.name}
-          </h2>
+          <h2 className="text-2xl font-semibold mb-1">{collection.name}</h2>
           {collection.description && (
             <p className="text-gray-600">{collection.description}</p>
           )}
         </div>
       </div>
 
-      {/* 일러스트 그리드 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
         {illustrations.map(ill => (
           <Link
@@ -87,16 +82,14 @@ export default async function CollectionDetailPage(input: {
             href={`/illustration/${ill.id}`}
             className="block overflow-hidden rounded"
           >
-            <img
-              src={ill.image_url}
-              alt={ill.title}
-              className="w-full h-48 object-cover"
-            />
+            <ThumbnailImage src={ill.image_url} alt={ill.title} />
+            <div className="mt-2 text-center">
+              <h3 className="text-sm font-medium">{ill.title}</h3>
+            </div>
           </Link>
         ))}
       </div>
 
-      {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="flex justify-center space-x-4">
           {currentPage > 1 && (

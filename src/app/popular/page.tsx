@@ -1,6 +1,8 @@
 // 파일 경로: src/app/popular/page.tsx
-import IllustrationCard from '@/components/IllustrationCard';
+
+import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
+import ThumbnailImage from '@/components/ThumbnailImage';
 
 type Illustration = {
   id: number;
@@ -27,22 +29,24 @@ export default async function PopularPage() {
   const items: Illustration[] = data || [];
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '3rem 2rem' }}>
-      {/* 헤더와 동일한 폭 및 여유 */}
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '1.5rem 2.5rem' }}>
       <h1 style={{ margin: '1rem 0 3rem' }} className="text-3xl font-bold">
         Popular Illustrations
       </h1>
 
-      {/* 반응형 5열 그리드, 간격 여유 있게 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {items.length > 0 ? (
-          items.map((item) => (
-            <IllustrationCard
+          items.map(item => (
+            <Link
+              href={`/illustration/${item.id}`}
               key={item.id}
-              id={item.id}
-              title={item.title}
-              imageUrl={item.image_url}
-            />
+              className="block"
+            >
+              <ThumbnailImage src={item.image_url} alt={item.title} />
+              <div className="mt-2 text-center">
+                <h2 className="text-sm font-medium">{item.title}</h2>
+              </div>
+            </Link>
           ))
         ) : (
           <div className="text-center text-gray-500 col-span-full">

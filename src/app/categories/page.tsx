@@ -1,8 +1,8 @@
 // 파일 경로: src/app/categories/page.tsx
 
 import Link from 'next/link';
-import IllustrationCard from '@/components/IllustrationCard';
 import { supabaseAdmin } from '@/lib/supabaseAdminClient';
+import ThumbnailImage from '@/components/ThumbnailImage';
 
 type Tag = {
   id: number;
@@ -20,14 +20,12 @@ export default async function CategoriesPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  // searchParams는 이제 Promise이므로 await 필요
   const { page } = await searchParams;
   const currentPage = parseInt(page ?? '1', 10);
-  const perPage = 40; // 5×8
+  const perPage = 40;
   const from = (currentPage - 1) * perPage;
   const to = currentPage * perPage - 1;
 
-  // 태그 조회
   const { data: tagData, error: tagsError } = await supabaseAdmin
     .from('tags')
     .select('id, name')
@@ -37,7 +35,6 @@ export default async function CategoriesPage({
   }
   const tags: Tag[] = tagData || [];
 
-  // 일러스트 조회 + 카운트
   const { data: illData, error: illError, count } = await supabaseAdmin
     .from('illustrations')
     .select('id, title, image_url', { count: 'exact' })
@@ -52,11 +49,9 @@ export default async function CategoriesPage({
   const totalPages = Math.ceil(totalItems / perPage);
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
-      {/* 제목 */}
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '0.5rem 3rem' }}>
       <h1 className="text-3xl font-bold my-8">Categories</h1>
 
-      {/* 태그 리스트 */}
       <ul className="flex flex-wrap gap-4 mb-8">
         <li>
           <Link
@@ -78,19 +73,21 @@ export default async function CategoriesPage({
         ))}
       </ul>
 
-      {/* 일러스트 그리드 (5열) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
         {illustrations.map(item => (
-          <IllustrationCard
+          <Link
+            href={`/illustration/${item.id}`}
             key={item.id}
-            id={item.id}
-            title={item.title}
-            imageUrl={item.image_url}
-          />
+            className="block"
+          >
+            <ThumbnailImage src={item.image_url} alt={item.title} />
+            <div className="mt-2 text-center">
+              <h2 className="text-sm font-medium">{item.title}</h2>
+            </div>
+          </Link>
         ))}
       </div>
 
-      {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-2">
           {currentPage > 1 && (

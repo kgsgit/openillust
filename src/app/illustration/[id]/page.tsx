@@ -140,12 +140,12 @@ export default function IllustrationPage() {
             />
             <div
               className="absolute inset-0"
-              onContextMenu={(e) => e.preventDefault()}
+              onContextMenu={e => e.preventDefault()}
             />
           </div>
           {tagObjs.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {tagObjs.map((tag) => (
+              {tagObjs.map(tag => (
                 <Link
                   key={tag.id}
                   href={`/categories/${tag.id}`}
@@ -254,8 +254,12 @@ export default function IllustrationPage() {
         <section className="mt-8">
           <h2 className="text-xl font-semibold mb-4">이 컬렉션의 다른 이미지</h2>
           <div className="grid grid-cols-5 gap-4">
-            {related.map((img) => (
-              <div key={img.id} className="relative">
+            {related.map(img => (
+              <Link
+                key={img.id}
+                href={`/illustration/${img.id}`}
+                className="relative block overflow-hidden rounded"
+              >
                 <img
                   src={toCdnUrl(img.image_url)}
                   alt=""
@@ -263,9 +267,9 @@ export default function IllustrationPage() {
                 />
                 <div
                   className="absolute inset-0"
-                  onContextMenu={(e) => e.preventDefault()}
+                  onContextMenu={e => e.preventDefault()}
                 />
-              </div>
+              </Link>
             ))}
           </div>
         </section>
