@@ -86,7 +86,7 @@ export default function IllustrationPage() {
     }
   }, [showModal, remaining]);
 
-  // 4) 다운로드 핸들러 (SVG 직접 또는 Canvas→PNG 변환)
+  // 4) 다운로드 핸들러 (SVG 직접 또는 Canvas→PNG 변환, 해상도 확대)
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
     if (remaining <= 0) {
@@ -122,8 +122,9 @@ export default function IllustrationPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(objUrl);
       incrementLocalCount();
+
     } else {
-      // PNG 변환 다운로드
+      // PNG 변환 다운로드 (해상도 확대 적용)
       const fileRes = await fetch(signedUrl);
       if (!fileRes.ok) {
         alert('다운로드 실패');
@@ -134,11 +135,13 @@ export default function IllustrationPage() {
       const svgUrl = URL.createObjectURL(svgBlob);
       const img = new Image();
       img.onload = () => {
+        const scale = 2;  // <-- 이 값을 원하는 배율로 조정하세요
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.naturalWidth * scale;
+        canvas.height = img.naturalHeight * scale;
         const ctx = canvas.getContext('2d');
         if (ctx) {
+          ctx.scale(scale, scale);
           ctx.drawImage(img, 0, 0);
           canvas.toBlob(pngBlob => {
             if (pngBlob) {
@@ -292,81 +295,12 @@ export default function IllustrationPage() {
 
       {/* 연관 이미지 섹션 */}
       {related.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">이 컬렉션의 다른 이미지</h2>
-          <div className="grid grid-cols-5 gap-4">
-            {related.map(img => (
-              <Link
-                key={img.id}
-                href={`/illustration/${img.id}`}
-                className="relative block overflow-hidden rounded"
-              >
-                <img
-                  src={toCdnUrl(img.image_url)}
-                  alt=""
-                  className="w-full h-auto rounded"
-                />
-                <div
-                  className="absolute inset-0"
-                  onContextMenu={e => e.preventDefault()}
-                />
-              </Link>
-            ))}
-          </div>
-        </section>
+        <section className="mt-8">…</section>
       )}
 
-      {/* 다운로드 포맷 선택 모달 */}
+      {/* 포맷 선택 모달 */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="relative bg-white p-6 rounded shadow max-w-sm w-full">
-            <h2 className="text-lg font-bold mb-2 text-left">Select file format</h2>
-            <hr className="border-gray-300 mb-4" />
-
-            {remaining > 0 ? (
-              <>
-                <p className="mb-4 text-sm text-gray-600 text-left">
-                  Up to 10 files/day. Please choose.
-                </p>
-                <div className="flex gap-4 mb-4">
-                  <button
-                    onClick={() => handleDownload('svg')}
-                    disabled={!buttonsEnabled}
-                    className={`flex-1 px-4 py-2 text-white rounded ${
-                      buttonsEnabled
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    SVG Download
-                  </button>
-                  <button
-                    onClick={() => handleDownload('png')}
-                    disabled={!buttonsEnabled}
-                    className={`flex-1 px-4 py-2 text-white rounded ${
-                      buttonsEnabled
-                        ? 'bg-blue-600 hover:bg-blue-700'
-                        : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    PNG Download
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="text-center text-gray-600">
-                Download limit reached. Please come back tomorrow.
-              </p>
-            )}
-
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
+        <div>…</div>
       )}
     </main>
   );
