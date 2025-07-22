@@ -28,20 +28,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'User identifier missing' }, { status: 400 });
   }
 
-  // 3.5) 클라이언트 IP 추출
+  // 4) 클라이언트 IP 추출
   const ip =
     request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 3.6) IP별 일일 다운로드 횟수 확인
+  // 5) IP별 일일 다운로드 횟수 확인
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { count: ipCount, error: ipError } = await supabaseAdmin
     .from('download_logs')
     .select('id', { head: true, count: 'exact' })
     .eq('illustration_id', illustrationId)
-    .eq('ip', ip)
+    .eq('ip_address', ip)
     .gte('created_at', todayStart.toISOString());
   if (ipError) {
     console.error('⚠️ IP count check error:', ipError);
@@ -49,9 +49,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
   }
 
-  // 4) 다운로드 카운트 증가 및 로그 삽입 (signed 모드일 때만)
+  // 6) 다운로드 카운트 증가 및 로그 삽입 (signed 모드일 때만)
   if (mode === 'signed') {
-    // 4-1) 카운트 증가 RPC
+    // 6-1) 카운트 증가 RPC
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
       p_user_identifier: userIdentifier,
@@ -61,19 +61,21 @@ export async function GET(request: NextRequest) {
       console.error('⚠️ increment_download_count error:', cntError);
       return NextResponse.json({ error: cntError.message }, { status: 403 });
     }
-    // 4-2) IP 로깅
-    const { error: logError } = await supabaseAdmin.from('download_logs').insert({
-      illustration_id: illustrationId,
-      user_identifier: userIdentifier,
-      ip,
-      download_type: fmt,
-    });
+    // 6-2) IP 로깅
+    const { error: logError } = await supabaseAdmin
+      .from('download_logs')
+      .insert({
+        illustration_id: illustrationId,
+        user_identifier: userIdentifier,
+        ip_address: ip,
+        download_type: fmt,
+      });
     if (logError) {
       console.error('⚠️ download_logs insert error:', logError);
     }
   }
 
-  // 5) 일러스트 정보 조회
+  // 7) 일러스트 정보 조회
   const { data: illust, error: illError } = await supabaseAdmin
     .from('illustrations')
     .select('image_path, image_url')
@@ -85,9 +87,9 @@ export async function GET(request: NextRequest) {
   const path = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 6) 모드별 처리
+  // 8) 모드별 처리
   if (mode === 'signed') {
-    // 6-1) 짧은 TTL Signed URL 발급
+    // 8-1) 짧은 TTL Signed URL 발급
     const { data: signed, error: signError } = await supabaseAdmin
       .storage
       .from('illustrations-private')
@@ -98,7 +100,7 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json({ url: signed.signedUrl });
   } else {
-    // 6-2) 스트리밍 방식
+    // 8-2) 스트리밍 방식
     const { data: signed2, error: signError2 } = await supabaseAdmin
       .storage
       .from('illustrations-private')
