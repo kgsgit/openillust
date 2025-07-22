@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid illustration ID' }, { status: 400 });
   }
 
+  // 디버그 로그: IP 확인
+  console.log('download request', {
+    illustrationId,
+    fmt,
+    mode,
+    ip: request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for'),
+  });
+
   // 3) 사용자 식별자 쿠키 확인
   const userIdentifier = request.cookies.get('user_identifier')?.value;
   if (!userIdentifier) {
@@ -51,7 +59,6 @@ export async function GET(request: NextRequest) {
 
   // 6) 다운로드 카운트 증가 및 로그 삽입 (signed 모드일 때만)
   if (mode === 'signed') {
-    // 6-1) 카운트 증가 RPC
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
       p_user_identifier: userIdentifier,
@@ -61,7 +68,6 @@ export async function GET(request: NextRequest) {
       console.error('⚠️ increment_download_count error:', cntError);
       return NextResponse.json({ error: cntError.message }, { status: 403 });
     }
-    // 6-2) IP 로깅
     const { error: logError } = await supabaseAdmin
       .from('download_logs')
       .insert({
@@ -89,7 +95,6 @@ export async function GET(request: NextRequest) {
 
   // 8) 모드별 처리
   if (mode === 'signed') {
-    // 8-1) 짧은 TTL Signed URL 발급
     const { data: signed, error: signError } = await supabaseAdmin
       .storage
       .from('illustrations-private')
@@ -100,7 +105,6 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json({ url: signed.signedUrl });
   } else {
-    // 8-2) 스트리밍 방식
     const { data: signed2, error: signError2 } = await supabaseAdmin
       .storage
       .from('illustrations-private')
@@ -112,13 +116,11 @@ export async function GET(request: NextRequest) {
       }
       return NextResponse.json({ error: 'File not found in private bucket' }, { status: 404 });
     }
-
     const upstream = await fetch(signed2.signedUrl);
     if (!upstream.ok) {
       console.error('⚠️ upstream fetch error:', upstream.statusText);
       return NextResponse.json({ error: 'Failed to fetch file for streaming' }, { status: 502 });
     }
-
     const filename = path.split('/').pop() || `illustration.${fmt}`;
     const headers = new Headers(upstream.headers);
     headers.set('Content-Disposition', `attachment; filename="${filename}"`);
