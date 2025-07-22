@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 5) 오늘자 IP별 다운로드 횟수 확인
+  // 5) 오늘자 IP별 다운로드 횟수 확인(10회 초과 시 차단)
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { count: ipCount, error: ipError } = await supabaseAdmin
@@ -51,12 +51,13 @@ export async function GET(request: NextRequest) {
     .eq('illustration_id', illustrationId)
     .eq('ip_address', ip)
     .gte('created_at', todayStart.toISOString());
-  if (ipError) console.error('⚠️ IP count check error:', ipError);
-  else if ((ipCount ?? 0) >= 10) {
+  if (ipError) {
+    console.error('⚠️ IP count check error:', ipError);
+  } else if ((ipCount ?? 0) >= 10) {
     return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
   }
 
-  // 6) signed 모드일 때만 RPC 호출 (로그 삽입 + 카운트)
+  // 6) signed 모드일 때만 RPC 호출 (로그 삽입 + 카운트 증가)
   if (mode === 'signed') {
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
@@ -82,66 +83,35 @@ export async function GET(request: NextRequest) {
   const origPath = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 8) 포맷별 파일 경로 결정 (PNG 요청 시 SVG → PNG, 없으면 SVG로 fallback)
-  const requestedPath = fmt === 'png' ? origPath.replace(/\.svg$/, '.png') : origPath;
+  // 8) 항상 SVG 원본 경로 사용
+  const requestedPath = origPath;
 
   // 9) 파일 반환
   if (mode === 'signed') {
-    // 9-1) 우선 요청 경로로 Signed URL 생성 시도
-    let signedUrl: string | null = null;
-    let { data: signed, error: signError } = await supabaseAdmin
+    const { data: signed, error: signError } = await supabaseAdmin
       .storage
       .from('illustrations-private')
       .createSignedUrl(requestedPath, 10);
     if (signError || !signed) {
-      console.warn('⚠️ signed-url failed for requestedPath, falling back:', signError);
-      // PNG 요청인데 파일 없으면 원본 SVG로 fallback
-      if (fmt === 'png') {
-        const fallback = await supabaseAdmin
-          .storage
-          .from('illustrations-private')
-          .createSignedUrl(origPath, 10);
-        if (!fallback.error && fallback.data) {
-          signedUrl = fallback.data.signedUrl;
-        }
-      }
-    } else {
-      signedUrl = signed.signedUrl;
-    }
-    if (!signedUrl) {
+      console.error('⚠️ createSignedUrl error:', signError);
       return NextResponse.json({ error: 'URL signing failed' }, { status: 500 });
     }
-    return NextResponse.json({ url: signedUrl });
+    return NextResponse.json({ url: signed.signedUrl });
   } else {
-    // 9-2) 스트리밍 방식: 요청 경로 우선, 실패 시 fallback
-    let streamUrl = publicUrl;
-    let { data: signed2, error: signError2 } = await supabaseAdmin
+    const { data: signed2, error: signError2 } = await supabaseAdmin
       .storage
       .from('illustrations-private')
       .createSignedUrl(requestedPath, 300);
     if (signError2 || !signed2) {
-      console.warn('⚠️ stream-url failed for requestedPath, falling back:', signError2);
-      if (fmt === 'png') {
-        const fallback2 = await supabaseAdmin
-          .storage
-          .from('illustrations-private')
-          .createSignedUrl(origPath, 300);
-        if (!fallback2.error && fallback2.data) {
-          streamUrl = fallback2.data.signedUrl;
-        }
-      } else {
-        streamUrl = signed2?.signedUrl ?? publicUrl;
-      }
-    } else {
-      streamUrl = signed2.signedUrl;
+      console.error('⚠️ createSignedUrl (stream) error:', signError2);
+      return NextResponse.json({ url: publicUrl });
     }
-
-    const upstream = await fetch(streamUrl);
+    const upstream = await fetch(signed2.signedUrl);
     if (!upstream.ok) {
       console.error('⚠️ upstream fetch error:', upstream.statusText);
       return NextResponse.json({ error: 'Failed to stream file' }, { status: 502 });
     }
-    const filename = requestedPath.split('/').pop() || `illustration.${fmt}`;
+    const filename = requestedPath.split('/').pop()!;
     const headers = new Headers(upstream.headers);
     headers.set('Content-Disposition', `attachment; filename="${filename}"`);
     return new Response(upstream.body, { status: upstream.status, headers });
