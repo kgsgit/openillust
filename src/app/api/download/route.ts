@@ -22,27 +22,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid illustration ID' }, { status: 400 });
   }
 
-  // 디버그 로그: IP 확인
-  console.log('download request', {
-    illustrationId,
-    fmt,
-    mode,
-    ip: request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for'),
+  // 3) 디버그 로그: 파라미터와 IP 헤더 확인
+  console.log('download request params:', { illustrationId, fmt, mode });
+  console.log('headers:', {
+    nf: request.headers.get('x-nf-client-connection-ip'),
+    real: request.headers.get('x-real-ip'),
+    forwarded: request.headers.get('x-forwarded-for'),
   });
 
-  // 3) 사용자 식별자 쿠키 확인
+  // 4) 사용자 식별자 쿠키 확인
   const userIdentifier = request.cookies.get('user_identifier')?.value;
   if (!userIdentifier) {
     return NextResponse.json({ error: 'User identifier missing' }, { status: 400 });
   }
 
-  // 4) 클라이언트 IP 추출
+  // 5) 클라이언트 IP 추출 (Netlify 헤더 우선)
   const ip =
+    request.headers.get('x-nf-client-connection-ip') ??
     request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 5) IP별 일일 다운로드 횟수 확인
+  // 6) IP별 일일 다운로드 횟수 확인
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { count: ipCount, error: ipError } = await supabaseAdmin
@@ -57,8 +58,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
   }
 
-  // 6) 다운로드 카운트 증가 및 로그 삽입 (signed 모드일 때만)
+  // 7) 다운로드 카운트 증가 및 로그 삽입 (signed 모드일 때만)
   if (mode === 'signed') {
+    // 7-1) 카운트 증가 RPC
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
       p_user_identifier: userIdentifier,
@@ -68,6 +70,7 @@ export async function GET(request: NextRequest) {
       console.error('⚠️ increment_download_count error:', cntError);
       return NextResponse.json({ error: cntError.message }, { status: 403 });
     }
+    // 7-2) 로그 삽입
     const { error: logError } = await supabaseAdmin
       .from('download_logs')
       .insert({
@@ -81,7 +84,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 7) 일러스트 정보 조회
+  // 8) 일러스트 정보 조회
   const { data: illust, error: illError } = await supabaseAdmin
     .from('illustrations')
     .select('image_path, image_url')
@@ -93,40 +96,37 @@ export async function GET(request: NextRequest) {
   const path = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 8) 모드별 처리
+  // 9) 모드별 처리
   if (mode === 'signed') {
+    // 9-1) Signed URL 발급
     const { data: signed, error: signError } = await supabaseAdmin
       .storage
       .from('illustrations-private')
       .createSignedUrl(path, 10);
     if (signError || !signed) {
-      console.error('⚠️ createSignedUrl (short TTL) error:', signError);
+      console.error('⚠️ createSignedUrl (signed) error:', signError);
       return NextResponse.json({ error: signError?.message || 'URL signing failed' }, { status: 500 });
     }
     return NextResponse.json({ url: signed.signedUrl });
   } else {
+    // 9-2) 스트리밍 방식
     const { data: signed2, error: signError2 } = await supabaseAdmin
       .storage
       .from('illustrations-private')
       .createSignedUrl(path, 300);
     if (signError2 || !signed2) {
       console.error('⚠️ createSignedUrl (stream) error:', signError2);
-      if (publicUrl) {
-        return NextResponse.json({ url: publicUrl });
-      }
-      return NextResponse.json({ error: 'File not found in private bucket' }, { status: 404 });
+      if (publicUrl) return NextResponse.json({ url: publicUrl });
+      return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
     const upstream = await fetch(signed2.signedUrl);
     if (!upstream.ok) {
       console.error('⚠️ upstream fetch error:', upstream.statusText);
-      return NextResponse.json({ error: 'Failed to fetch file for streaming' }, { status: 502 });
+      return NextResponse.json({ error: 'Failed to stream file' }, { status: 502 });
     }
     const filename = path.split('/').pop() || `illustration.${fmt}`;
     const headers = new Headers(upstream.headers);
     headers.set('Content-Disposition', `attachment; filename="${filename}"`);
-    return new Response(upstream.body, {
-      status: upstream.status,
-      headers,
-    });
+    return new Response(upstream.body, { status: upstream.status, headers });
   }
 }
