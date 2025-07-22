@@ -1,61 +1,51 @@
 // 파일 경로: src/app/collections/page.tsx
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-import Link from 'next/link'
-import { supabaseAdmin } from '@/lib/supabaseAdminClient'
-import ThumbnailImage from '@/components/ThumbnailImage'
+import Link from 'next/link';
+import { supabaseAdmin } from '@/lib/supabaseAdminClient';
+import ThumbnailImage from '@/components/ThumbnailImage';
 
-interface Collection {
-  id: number
-  name: string
-  description: string | null
-  thumbnail2_url: string | null
+export interface Collection {
+  id: number;
+  name: string;
+  description: string | null;
+  thumbnail2_url: string | null;
 }
 
 // null-safe CDN URL 변환 함수
 function toCdnUrl(raw?: string | null): string {
-  if (!raw) return ''
-  const m = raw.match(/public\/illustrations\/images\/(.+)$/)
-  return m ? `/cdn/illustrations/images/${m[1]}` : raw
+  if (!raw) return '';
+  const m = raw.match(/public\/illustrations\/images\/(.+)$/);
+  return m ? `/cdn/illustrations/images/${m[1]}` : raw;
 }
 
 export default async function CollectionsPage() {
-  // 직접 DB 조회
   const { data: collections, error } = await supabaseAdmin
     .from('collections')
     .select('id, name, description, thumbnail2_url')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
-    throw new Error(`컬렉션 로드 실패: ${error.message}`)
+    throw new Error(`컬렉션 로드 실패: ${error.message}`);
   }
 
   return (
     <main className="max-w-5xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Collections</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {collections!.map((col) => (
+        {collections.map((col) => (
           <div
             key={col.id}
             className="bg-white shadow rounded-lg overflow-hidden"
           >
             <Link href={`/collections/${col.id}`}>
-              <div
-                className="relative w-full overflow-hidden"
-                style={{ paddingTop: '75%' }}
-              >
-                {col.thumbnail2_url ? (
-                  <ThumbnailImage
-                    src={toCdnUrl(col.thumbnail2_url)}
-                    alt={`${col.name} 썸네일`}
-                    ratio={75}
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-gray-100 flex items-center justify-center text-gray-400">
-                    이미지 없음
-                  </div>
-                )}
-              </div>
+              {col.thumbnail2_url && (
+                <ThumbnailImage
+                  src={toCdnUrl(col.thumbnail2_url)}
+                  alt={`${col.name} 썸네일`}
+                  ratio={75}
+                />
+              )}
             </Link>
             <div className="px-4 py-3">
               <h2 className="text-lg font-semibold">{col.name}</h2>
@@ -75,5 +65,5 @@ export default async function CollectionsPage() {
         ))}
       </div>
     </main>
-  )
+  );
 }
