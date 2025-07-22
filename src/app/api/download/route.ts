@@ -6,14 +6,13 @@ import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // 1) 쿼리 파라미터 파싱
+  // 1) 파라미터 파싱
   const url = new URL(request.url);
   const params = url.searchParams;
   const idParam = params.get('illustration');
   const fmt = (params.get('format') as 'svg' | 'png') ?? 'png';
   const mode = (params.get('mode') as 'signed' | 'stream') ?? 'signed';
 
-  // 2) illustration ID 유효성 검사
   if (!idParam) {
     return NextResponse.json({ error: 'Illustration ID is required' }, { status: 400 });
   }
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid illustration ID' }, { status: 400 });
   }
 
-  // 3) 디버그 로그: 파라미터와 IP 헤더 확인
+  // 2) 디버그 로그
   console.log('download request params:', { illustrationId, fmt, mode });
   console.log('headers:', {
     nf: request.headers.get('x-nf-client-connection-ip'),
@@ -30,20 +29,20 @@ export async function GET(request: NextRequest) {
     forwarded: request.headers.get('x-forwarded-for'),
   });
 
-  // 4) 사용자 식별자 쿠키 확인
+  // 3) 쿠키 확인
   const userIdentifier = request.cookies.get('user_identifier')?.value;
   if (!userIdentifier) {
     return NextResponse.json({ error: 'User identifier missing' }, { status: 400 });
   }
 
-  // 5) 클라이언트 IP 추출 (Netlify 헤더 우선)
+  // 4) 클라이언트 IP 결정 (Netlify 헤더 우선)
   const ip =
     request.headers.get('x-nf-client-connection-ip') ??
     request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 6) IP별 일일 다운로드 횟수 확인
+  // 5) 오늘자 IP별 다운로드 횟수 조회
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const { count: ipCount, error: ipError } = await supabaseAdmin
@@ -52,15 +51,25 @@ export async function GET(request: NextRequest) {
     .eq('illustration_id', illustrationId)
     .eq('ip_address', ip)
     .gte('created_at', todayStart.toISOString());
-  if (ipError) {
-    console.error('⚠️ IP count check error:', ipError);
-  } else if ((ipCount ?? 0) >= 10) {
+  if (ipError) console.error('⚠️ IP count check error:', ipError);
+  else if ((ipCount ?? 0) >= 10) {
     return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
   }
 
-  // 7) 다운로드 카운트 증가 및 로그 삽입 (signed 모드일 때만)
+  // 6) signed 모드일 때만 다운로드 로그 기록 및 카운트
   if (mode === 'signed') {
-    // 7-1) 카운트 증가 RPC
+    // 6-1) IP 로그는 항상 먼저 기록
+    const { error: logError } = await supabaseAdmin
+      .from('download_logs')
+      .insert({
+        illustration_id: illustrationId,
+        user_identifier: userIdentifier,
+        ip_address: ip,
+        download_type: fmt,
+      });
+    if (logError) console.error('⚠️ download_logs insert error:', logError);
+
+    // 6-2) RPC로 일일 카운트 증가
     const { error: cntError } = await supabaseAdmin.rpc('increment_download_count', {
       p_illustration_id: illustrationId,
       p_user_identifier: userIdentifier,
@@ -70,21 +79,9 @@ export async function GET(request: NextRequest) {
       console.error('⚠️ increment_download_count error:', cntError);
       return NextResponse.json({ error: cntError.message }, { status: 403 });
     }
-    // 7-2) 로그 삽입
-    const { error: logError } = await supabaseAdmin
-      .from('download_logs')
-      .insert({
-        illustration_id: illustrationId,
-        user_identifier: userIdentifier,
-        ip_address: ip,
-        download_type: fmt,
-      });
-    if (logError) {
-      console.error('⚠️ download_logs insert error:', logError);
-    }
   }
 
-  // 8) 일러스트 정보 조회
+  // 7) 일러스트 정보 조회
   const { data: illust, error: illError } = await supabaseAdmin
     .from('illustrations')
     .select('image_path, image_url')
@@ -96,20 +93,18 @@ export async function GET(request: NextRequest) {
   const path = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 9) 모드별 처리
+  // 8) 파일 반환 로직
   if (mode === 'signed') {
-    // 9-1) Signed URL 발급
     const { data: signed, error: signError } = await supabaseAdmin
       .storage
       .from('illustrations-private')
       .createSignedUrl(path, 10);
     if (signError || !signed) {
-      console.error('⚠️ createSignedUrl (signed) error:', signError);
+      console.error('⚠️ createSignedUrl error:', signError);
       return NextResponse.json({ error: signError?.message || 'URL signing failed' }, { status: 500 });
     }
     return NextResponse.json({ url: signed.signedUrl });
   } else {
-    // 9-2) 스트리밍 방식
     const { data: signed2, error: signError2 } = await supabaseAdmin
       .storage
       .from('illustrations-private')
