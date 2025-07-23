@@ -86,7 +86,7 @@ export default function IllustrationPage() {
     }
   }, [showModal, remaining]);
 
-  // 4) Download handler (direct SVG or Canvas→PNG conversion)
+  // 4) Download handler (permission check + CDN fetch)
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
     if (remaining <= 0) {
@@ -94,51 +94,43 @@ export default function IllustrationPage() {
       return;
     }
 
-    // 4-1) RPC call and get signed URL
-    const rpcRes = await fetch(
-      `/api/download?illustration=${illustrationId}&format=${fmt}&mode=signed`
+    // 4-1) permission API call (count/increment on client)
+    const permRes = await fetch(
+      `/api/download?illustration=${illustrationId}&format=${fmt}`
     );
-    const rpcJson = await rpcRes.json();
-    if (!rpcRes.ok) {
-      alert(rpcJson.error || 'Download failed.');
+    const permJson = await permRes.json();
+    if (!permRes.ok || !permJson.ok) {
+      alert(permJson.error || 'Download not allowed.');
       return;
     }
-    const signedUrl = rpcJson.url as string;
+
+    // Build CDN URL for raw SVG
+    const cdnSvgUrl = toCdnUrl(data!.image_url);
 
     if (fmt === 'svg') {
-      // SVG direct download
-      const fileRes = await fetch(signedUrl);
-      if (!fileRes.ok) {
-        alert('Download failed.');
-        return;
-      }
-      const blob = await fileRes.blob();
-      const objUrl = URL.createObjectURL(blob);
+      // direct download from CDN
       const a = document.createElement('a');
-      a.href = objUrl;
+      a.href = cdnSvgUrl;
       a.download = `${illustrationId}.svg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(objUrl);
       incrementLocalCount();
     } else {
-      // PNG conversion download: parse viewBox to preserve full artboard
-      const fileRes = await fetch(signedUrl);
+      // PNG conversion download: fetch SVG from CDN
+      const fileRes = await fetch(cdnSvgUrl);
       if (!fileRes.ok) {
         alert('Download failed.');
         return;
       }
       let svgText = await fileRes.text();
-      // remove explicit width/height attributes
       svgText = svgText.replace(/\s(width|height)="[^"]*"/g, '');
 
       // parse viewBox dimensions
       const parser = new DOMParser();
       const doc = parser.parseFromString(svgText, 'image/svg+xml');
       const svgEl = doc.querySelector('svg');
-      let vbWidth = 0;
-      let vbHeight = 0;
+      let vbWidth = 0, vbHeight = 0;
       const viewBox = svgEl?.getAttribute('viewBox');
       if (viewBox) {
         const parts = viewBox.split(/[\s,]+/).map(Number);
@@ -148,7 +140,7 @@ export default function IllustrationPage() {
         }
       }
 
-      const scale = 8; // adjust scale as needed
+      const scale = 8; // as requested
       const canvas = document.createElement('canvas');
       canvas.width = vbWidth * scale;
       canvas.height = vbHeight * scale;
@@ -158,33 +150,25 @@ export default function IllustrationPage() {
       const img = new Image();
 
       img.onload = () => {
-        console.log(
-          'SVG viewBox:', viewBox,
-          'vbWidth/vbHeight:', vbWidth, vbHeight,
-          'img natural:', img.naturalWidth, img.naturalHeight
-        );
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // draw the entire image to full canvas
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(pngBlob => {
-            if (pngBlob) {
-              const pngUrl = URL.createObjectURL(pngBlob);
-              const a = document.createElement('a');
-              a.href = pngUrl;
-              a.download = `${illustrationId}.png`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(pngUrl);
-              incrementLocalCount();
-            } else {
-              alert('PNG conversion failed.');
-            }
-          }, 'image/png');
-        }
+        const ctx = canvas.getContext('2d')!;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(pngBlob => {
+          if (pngBlob) {
+            const pngUrl = URL.createObjectURL(pngBlob);
+            const a = document.createElement('a');
+            a.href = pngUrl;
+            a.download = `${illustrationId}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(pngUrl);
+            incrementLocalCount();
+          } else {
+            alert('PNG conversion failed.');
+          }
+        }, 'image/png');
         URL.revokeObjectURL(svgUrl);
       };
 
@@ -197,12 +181,12 @@ export default function IllustrationPage() {
     }
   };
 
-  if (!data) return <div className="p-8 text-center">Loading...</div>;
+  if (!data) return <div className="p-8 text-center">Loading…</div>;
 
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Image preview (with right-click prevention) */}
+        {/* Image preview */}
         <div className="md:w-1/2 w-full">
           <div className="relative">
             <img
@@ -210,10 +194,7 @@ export default function IllustrationPage() {
               alt={data.title}
               className="w-full h-auto rounded"
             />
-            <div
-              className="absolute inset-0"
-              onContextMenu={e => e.preventDefault()}
-            />
+            <div className="absolute inset-0" onContextMenu={e => e.preventDefault()} />
           </div>
           {tagObjs.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
@@ -273,7 +254,7 @@ export default function IllustrationPage() {
             </p>
           </div>
 
-          {/* Social share buttons */}
+          {/* Social share */}
           <div className="flex gap-4 mt-4">
             <button
               onClick={() =>
@@ -342,7 +323,7 @@ export default function IllustrationPage() {
         </section>
       )}
 
-      {/* Download format selection modal */}
+      {/* Download format modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="relative bg-white p-6 rounded shadow max-w-sm w-full">
@@ -395,5 +376,5 @@ export default function IllustrationPage() {
         </div>
       )}
     </main>
-);
+  );
 }
