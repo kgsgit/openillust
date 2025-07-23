@@ -13,22 +13,33 @@ interface Illustration {
 }
 
 export default function HomePage() {
-  const [items, setItems] = useState<Illustration[]>([]);
+  const [latest, setLatest] = useState<Illustration[]>([]);
+  const [popular, setPopular] = useState<Illustration[]>([]);
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
+      // 최신 12개 (4컬럼 × 3행)
+      const { data: latestData, error: latestError } = await supabase
         .from('illustrations')
         .select('id, title, image_url, created_at')
         .eq('visible', true)
         .order('created_at', { ascending: false })
-        .limit(20);
-      if (!error && data) setItems(data);
+        .limit(12);
+      if (!latestError && latestData) setLatest(latestData);
+
+      // 인기 4개 (4컬럼 × 1행)
+      const { data: popularData, error: popularError } = await supabase
+        .from('illustrations')
+        .select('id, title, image_url, created_at')
+        .eq('visible', true)
+        .order('download_count', { ascending: false })
+        .limit(4);
+      if (!popularError && popularData) setPopular(popularData);
     })();
   }, []);
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '4rem' }}>
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
       <section style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>
           Not just more images. Only the right ones.
@@ -38,15 +49,16 @@ export default function HomePage() {
         </p>
       </section>
 
-      <section>
+      {/* 최신 3행 */}
+      <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '1rem',
           }}
         >
-          {items.map(item => (
+          {latest.map(item => (
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
@@ -56,6 +68,44 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* 인기 1행 */}
+      <section style={{ marginBottom: '2rem' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '1rem',
+          }}
+        >
+          {popular.map(item => (
+            <Link href={`/illustration/${item.id}`} key={item.id}>
+              <ThumbnailImage src={item.image_url} alt={item.title} />
+              <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>{item.title}</h2>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* More 버튼 */}
+      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+        <Link
+          href="/categories"
+          style={{
+            display: 'inline-block',
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#1f2937',
+            color: '#ffffff',
+            borderRadius: '0.375rem',
+            textDecoration: 'none',
+            fontWeight: 500,
+          }}
+        >
+          More
+        </Link>
+      </div>
     </main>
   );
 }

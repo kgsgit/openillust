@@ -1,4 +1,4 @@
-// src/app/illustration/[id]/page.tsx
+// 파일 경로: src/app/illustration/[id]/page.tsx
 
 'use client';
 
@@ -103,17 +103,14 @@ export default function IllustrationPage() {
       alert(permJson.error || 'Download failed.');
       return;
     }
-    // Show any error message from API (e.g. IP limit)
     if (permJson.error) {
       alert(permJson.error);
       return;
     }
 
-    // CDN URL for SVG
     const cdnSvgUrl = toCdnUrl(data!.image_url);
 
     if (fmt === 'svg') {
-      // direct download of SVG via CDN
       const a = document.createElement('a');
       a.href = cdnSvgUrl;
       a.download = `${illustrationId}.svg`;
@@ -122,17 +119,14 @@ export default function IllustrationPage() {
       document.body.removeChild(a);
       incrementLocalCount();
     } else {
-      // PNG conversion: fetch SVG from CDN
       const fileRes = await fetch(cdnSvgUrl);
       if (!fileRes.ok) {
         alert('Download failed.');
         return;
       }
       let svgText = await fileRes.text();
-      // remove explicit width/height
       svgText = svgText.replace(/\s(width|height)="[^"]*"/g, '');
 
-      // parse viewBox
       const parser = new DOMParser();
       const doc = parser.parseFromString(svgText, 'image/svg+xml');
       const svgEl = doc.querySelector('svg');
@@ -146,7 +140,7 @@ export default function IllustrationPage() {
         }
       }
 
-      const scale = 8; // as requested
+      const scale = 8;
       const canvas = document.createElement('canvas');
       canvas.width = vbWidth * scale;
       canvas.height = vbHeight * scale;
@@ -192,7 +186,7 @@ export default function IllustrationPage() {
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Image preview (right-click disabled) */}
+        {/* Image preview (watermark + right-click disabled) */}
         <div className="md:w-1/2 w-full">
           <div className="relative">
             <img
@@ -200,6 +194,18 @@ export default function IllustrationPage() {
               alt={data.title}
               className="w-full h-auto rounded"
             />
+            {/* 워터마크 오버레이 */}
+            <div className="absolute inset-0 flex flex-wrap items-center justify-center pointer-events-none">
+              {[...Array(5)].map((_, i) => (
+                <span
+                  key={i}
+                  className="text-5xl text-gray-200 -rotate-45 opacity-20 m-8 select-none"
+                >
+                  openillust
+                </span>
+              ))}
+            </div>
+            {/* 우클릭 방지 레이어 */}
             <div
               className="absolute inset-0"
               onContextMenu={e => e.preventDefault()}
@@ -274,7 +280,7 @@ export default function IllustrationPage() {
                   '_blank'
                 )
               }
-              className="flex items-center gap-2 px-3 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+              className="flex items-center gap-2 px-2 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
             >
               <FaFacebookF size={20} />
             </button>
@@ -287,13 +293,13 @@ export default function IllustrationPage() {
                   '_blank'
                 )
               }
-              className="flex items-center gap-2 px-3 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
+              className="flex items-center gap-2 px-2 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
             >
               <FaTwitter size={20} />
             </button>
             <button
               onClick={() => navigator.share?.({ url: window.location.href })}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              className="flex items-center gap-2 px-2 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
               <FaShareAlt size={20} />
             </button>

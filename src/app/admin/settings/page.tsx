@@ -1,92 +1,112 @@
+// 파일 경로: src/app/admin/settings/page.tsx
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
-
-interface Settings {
-  banner_enabled?: string;
-  banner_image_url?: string;
-  banner_link_url?: string;
-}
+import React, { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<Settings>({});
+  const [bannerImageUrl, setBannerImageUrl] = useState('');
+  const [bannerLinkUrl, setBannerLinkUrl] = useState('');
+  const [bannerEnabled, setBannerEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     fetch('/api/settings')
       .then(res => res.json())
-      .then((data: Settings) => {
-        setSettings(data);
-        setLoading(false);
+      .then(data => {
+        setBannerImageUrl(data.banner_image_url || '');
+        setBannerLinkUrl(data.banner_link_url || '');
+        setBannerEnabled(data.banner_enabled === 'true');
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleChange =
-    (key: keyof Settings) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value =
-        e.target.type === 'checkbox'
-          ? e.target.checked
-            ? 'true'
-            : 'false'
-          : e.target.value;
-      setSettings(prev => ({ ...prev, [key]: value }));
-    };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
-    });
-    setSaving(false);
-    alert('설정이 저장되었습니다.');
+    setLoading(true);
+    setMessage('');
+    const payload = {
+      banner_image_url: bannerImageUrl,
+      banner_link_url: bannerLinkUrl,
+      banner_enabled: bannerEnabled ? 'true' : 'false'
+    };
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setMessage('설정이 저장되었습니다.');
+    } catch (err) {
+      console.error(err);
+      setMessage('저장 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return <p className="text-center py-10">로딩 중…</p>;
+  }
 
   return (
-    <main className="container mx-auto max-w-screen-lg px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">관리자 설정</h1>
+    <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow">
+      {message && (
+        <p className="mb-4 text-center text-green-600">{message}</p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label
+            htmlFor="bannerImageUrl"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            배너 이미지 URL
+          </label>
+          <input
+            id="bannerImageUrl"
+            type="text"
+            value={bannerImageUrl}
+            onChange={e => setBannerImageUrl(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="bannerLinkUrl"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            배너 링크 URL
+          </label>
+          <input
+            id="bannerLinkUrl"
+            type="text"
+            value={bannerLinkUrl}
+            onChange={e => setBannerLinkUrl(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
         <div className="flex items-center">
-          <label className="mr-2">배너 노출</label>
           <input
+            id="bannerEnabled"
             type="checkbox"
-            checked={settings.banner_enabled === 'true'}
-            onChange={handleChange('banner_enabled')}
+            checked={bannerEnabled}
+            onChange={e => setBannerEnabled(e.target.checked)}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
           />
-        </div>
-        <div>
-          <label className="block mb-1">배너 이미지 URL</label>
-          <input
-            type="text"
-            value={settings.banner_image_url || ''}
-            onChange={handleChange('banner_image_url')}
-            className="w-full border px-2 py-1 rounded"
-          />
-        </div>
-        <div>
-          <label className="block mb-1">배너 링크 URL</label>
-          <input
-            type="text"
-            value={settings.banner_link_url || ''}
-            onChange={handleChange('banner_link_url')}
-            className="w-full border px-2 py-1 rounded"
-          />
+          <label htmlFor="bannerEnabled" className="ml-2 block text-sm text-gray-700">
+            배너 노출
+          </label>
         </div>
         <button
           type="submit"
-          disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          disabled={loading}
+          className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
-          {saving ? '저장 중...' : '저장'}
+          {loading ? '저장 중…' : '저장'}
         </button>
       </form>
-    </main>
+    </div>
   );
 }
