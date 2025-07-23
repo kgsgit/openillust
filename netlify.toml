@@ -7,6 +7,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# API 엔드포인트에 CORS 헤더 적용
 [[headers]]
   for = "/api/*"
   [headers.values]
@@ -14,12 +15,14 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
 
+# Supabase 스토리지의 public 이미지 요청을 Netlify CDN으로 프록시
 [[redirects]]
   from   = "/cdn/illustrations/images/*"
   to     = "https://jtdmtrdqhefekqgfxnpf.supabase.co/storage/v1/object/public/illustrations/images/:splat"
   status = 200
   force  = true
 
+# CDN 경로에 강력한 캐시 정책 적용
 [[headers]]
   for = "/cdn/illustrations/images/*"
   [headers.values]
