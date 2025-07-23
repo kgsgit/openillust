@@ -1,4 +1,4 @@
-// src/app/illustration/[id]/page.tsx
+// 파일 경로: src/app/illustration/[id]/page.tsx
 
 'use client';
 
@@ -86,7 +86,7 @@ export default function IllustrationPage() {
     }
   }, [showModal, remaining]);
 
-  // 4) Download handler (permission + CDN fetch)
+  // 4) Download handler (permission check + CDN fetch)
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
     if (remaining <= 0) {
@@ -94,7 +94,7 @@ export default function IllustrationPage() {
       return;
     }
 
-    // 4-1) permission check only
+    // 4-1) permission API call (count/increment on client)
     const permRes = await fetch(
       `/api/download?illustration=${illustrationId}&format=${fmt}`
     );
@@ -104,11 +104,11 @@ export default function IllustrationPage() {
       return;
     }
 
-    // CDN URL for SVG
+    // Build CDN URL for raw SVG
     const cdnSvgUrl = toCdnUrl(data!.image_url);
 
     if (fmt === 'svg') {
-      // direct download of SVG via CDN
+      // direct download from CDN
       const a = document.createElement('a');
       a.href = cdnSvgUrl;
       a.download = `${illustrationId}.svg`;
@@ -117,17 +117,16 @@ export default function IllustrationPage() {
       document.body.removeChild(a);
       incrementLocalCount();
     } else {
-      // PNG conversion: fetch SVG from CDN
+      // PNG conversion download: fetch SVG from CDN
       const fileRes = await fetch(cdnSvgUrl);
       if (!fileRes.ok) {
         alert('Download failed.');
         return;
       }
       let svgText = await fileRes.text();
-      // remove explicit width/height
       svgText = svgText.replace(/\s(width|height)="[^"]*"/g, '');
 
-      // parse viewBox
+      // parse viewBox dimensions
       const parser = new DOMParser();
       const doc = parser.parseFromString(svgText, 'image/svg+xml');
       const svgEl = doc.querySelector('svg');
@@ -141,7 +140,7 @@ export default function IllustrationPage() {
         }
       }
 
-      const scale = 8; // user-requested scale
+      const scale = 8; // as requested
       const canvas = document.createElement('canvas');
       canvas.width = vbWidth * scale;
       canvas.height = vbHeight * scale;
@@ -187,7 +186,7 @@ export default function IllustrationPage() {
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Image preview (right-click disabled) */}
+        {/* Image preview */}
         <div className="md:w-1/2 w-full">
           <div className="relative">
             <img
@@ -195,10 +194,7 @@ export default function IllustrationPage() {
               alt={data.title}
               className="w-full h-auto rounded"
             />
-            <div
-              className="absolute inset-0"
-              onContextMenu={e => e.preventDefault()}
-            />
+            <div className="absolute inset-0" onContextMenu={e => e.preventDefault()} />
           </div>
           {tagObjs.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
@@ -218,11 +214,9 @@ export default function IllustrationPage() {
         {/* Info & download section */}
         <div className="md:w-1/2 w-full space-y-4">
           <h1 className="text-3xl font-bold">{data.title}</h1>
-          {data.description && (
-            <p className="text-gray-700">{data.description}</p>
-          )}
+          {data.description && <p className="text-gray-700">{data.description}</p>}
 
-          {/* Download controls */}
+          {/* Download button */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowModal(true)}
@@ -303,7 +297,7 @@ export default function IllustrationPage() {
         </div>
       </div>
 
-      {/* Related Images */}
+      {/* Related Images section */}
       {related.length > 0 && (
         <section className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Related Images</h2>
