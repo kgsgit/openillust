@@ -19,8 +19,8 @@ export default function ContactPage() {
           We generally do not engage in open communication or feedback collection.
         </p>
         <Image
-          src="/about/4.svg"
-          alt="Paper plane doodle"
+          src="/about/5.svg"
+          alt="contact"
           width={200}
           height={200}
           className="mx-auto mt-4"

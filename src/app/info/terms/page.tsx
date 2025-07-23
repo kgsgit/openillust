@@ -19,9 +19,9 @@ export default function TermsPage() {
         </p>
         <Image
           src="/about/6.svg"
-          alt="Terms doodle"
-          width={200}
-          height={200}
+          alt="Terms"
+          width={400}
+          height={400}
           className="mx-auto mt-4"
         />
       </section>

@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 lg:px-8 py-16 space-y-20">
+    <main className="mx-auto w-full max-w-4xl px-6 lg:px-8 py-16 space-y-10">
       {/* HERO */}
       <section className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight mb-4">
@@ -19,8 +19,8 @@ export default function AboutPage() {
         <Image
           src="/about/1.svg"
           alt="Team celebrating"
-          width={320}
-          height={320}
+          width={500}
+          height={400}
           priority
           className="mx-auto mt-12"
         />
@@ -106,7 +106,7 @@ export default function AboutPage() {
       <section className="text-center space-y-4">
         <Image
           src="/about/5.svg"
-          alt="Croissant doodle"
+          alt="Croissant "
           width={200}
           height={200}
           className="mx-auto"

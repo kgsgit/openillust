@@ -18,10 +18,10 @@ export default function PrivacyPage() {
           or store personal profiles. The few details we keep help us run the site smoothly.
         </p>
         <Image
-          src="/about/5.svg"
-          alt="Croissant doodle"
-          width={200}
-          height={200}
+          src="/about/7.svg"
+          alt="ice cream"
+          width={400}
+          height={400}
           className="mx-auto mt-4"
         />
       </section>
