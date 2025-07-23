@@ -29,7 +29,7 @@ interface Tag {
   name: string;
 }
 
-function toCdnUrl(raw: string) {
+function toCdnUrl(raw: string): string {
   const m = raw.match(/public\/illustrations\/images\/(.+)$/);
   return m ? `/cdn/illustrations/images/${m[1]}` : raw;
 }
@@ -44,7 +44,7 @@ export default function IllustrationPage() {
   const [buttonsEnabled, setButtonsEnabled] = useState(false);
   const { remaining, incrementLocalCount } = useDownloadLimit(illustrationId);
 
-  // 1) 상세 데이터 로드
+  // 1) Load illustration data
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -61,7 +61,7 @@ export default function IllustrationPage() {
     })();
   }, [id]);
 
-  // 2) 연관 이미지 로드
+  // 2) Load related images
   useEffect(() => {
     if (!data?.collection_id) return;
     (async () => {
@@ -77,7 +77,7 @@ export default function IllustrationPage() {
     })();
   }, [data, illustrationId]);
 
-  // 3) 모달 내 버튼 활성 지연
+  // 3) Delay enabling buttons in modal
   useEffect(() => {
     if (showModal && remaining > 0) {
       setButtonsEnabled(false);
@@ -86,30 +86,30 @@ export default function IllustrationPage() {
     }
   }, [showModal, remaining]);
 
-  // 4) 다운로드 핸들러 (SVG 직접 또는 Canvas→PNG 변환)
+  // 4) Download handler (direct SVG or Canvas→PNG conversion)
   const handleDownload = async (fmt: 'svg' | 'png') => {
     setShowModal(false);
     if (remaining <= 0) {
-      alert('오늘 다운로드 한도(10회)를 모두 사용하셨습니다.');
+      alert('Download limit reached for today.');
       return;
     }
 
-    // 4-1) RPC 호출 및 서명 URL 획득
+    // 4-1) RPC call and get signed URL
     const rpcRes = await fetch(
       `/api/download?illustration=${illustrationId}&format=${fmt}&mode=signed`
     );
     const rpcJson = await rpcRes.json();
     if (!rpcRes.ok) {
-      alert(rpcJson.error || '다운로드 실패');
+      alert(rpcJson.error || 'Download failed.');
       return;
     }
     const signedUrl = rpcJson.url as string;
 
     if (fmt === 'svg') {
-      // SVG 직접 다운로드
+      // SVG direct download
       const fileRes = await fetch(signedUrl);
       if (!fileRes.ok) {
-        alert('다운로드 실패');
+        alert('Download failed.');
         return;
       }
       const blob = await fileRes.blob();
@@ -123,23 +123,52 @@ export default function IllustrationPage() {
       URL.revokeObjectURL(objUrl);
       incrementLocalCount();
     } else {
-      // PNG 변환 다운로드
+      // PNG conversion download: parse viewBox to preserve full artboard
       const fileRes = await fetch(signedUrl);
       if (!fileRes.ok) {
-        alert('다운로드 실패');
+        alert('Download failed.');
         return;
       }
-      const svgText = await fileRes.text();
+      let svgText = await fileRes.text();
+      // remove explicit width/height attributes
+      svgText = svgText.replace(/\s(width|height)="[^"]*"/g, '');
+
+      // parse viewBox dimensions
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgEl = doc.querySelector('svg');
+      let vbWidth = 0;
+      let vbHeight = 0;
+      const viewBox = svgEl?.getAttribute('viewBox');
+      if (viewBox) {
+        const parts = viewBox.split(/[\s,]+/).map(Number);
+        if (parts.length === 4) {
+          vbWidth = parts[2];
+          vbHeight = parts[3];
+        }
+      }
+
+      const scale = 8; // adjust scale as needed
+      const canvas = document.createElement('canvas');
+      canvas.width = vbWidth * scale;
+      canvas.height = vbHeight * scale;
+
       const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
       const svgUrl = URL.createObjectURL(svgBlob);
       const img = new Image();
+
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        console.log(
+          'SVG viewBox:', viewBox,
+          'vbWidth/vbHeight:', vbWidth, vbHeight,
+          'img natural:', img.naturalWidth, img.naturalHeight
+        );
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(img, 0, 0);
+          // draw the entire image to full canvas
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           canvas.toBlob(pngBlob => {
             if (pngBlob) {
               const pngUrl = URL.createObjectURL(pngBlob);
@@ -152,26 +181,28 @@ export default function IllustrationPage() {
               URL.revokeObjectURL(pngUrl);
               incrementLocalCount();
             } else {
-              alert('PNG 변환 실패');
+              alert('PNG conversion failed.');
             }
           }, 'image/png');
         }
         URL.revokeObjectURL(svgUrl);
       };
+
       img.onerror = () => {
-        alert('PNG 변환 실패');
+        alert('PNG conversion failed.');
         URL.revokeObjectURL(svgUrl);
       };
+
       img.src = svgUrl;
     }
   };
 
-  if (!data) return <div className="p-8 text-center">Loading…</div>;
+  if (!data) return <div className="p-8 text-center">Loading...</div>;
 
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* 이미지 프리뷰 (우클릭 차단 레이어 포함) */}
+        {/* Image preview (with right-click prevention) */}
         <div className="md:w-1/2 w-full">
           <div className="relative">
             <img
@@ -199,14 +230,12 @@ export default function IllustrationPage() {
           )}
         </div>
 
-        {/* 정보 & 다운로드 섹션 */}
+        {/* Info & download section */}
         <div className="md:w-1/2 w-full space-y-4">
           <h1 className="text-3xl font-bold">{data.title}</h1>
-          {data.description && (
-            <p className="text-gray-700">{data.description}</p>
-          )}
+          {data.description && <p className="text-gray-700">{data.description}</p>}
 
-          {/* Download 버튼 */}
+          {/* Download button */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowModal(true)}
@@ -219,7 +248,7 @@ export default function IllustrationPage() {
             >
               Download
             </button>
-            <a
+            <Link
               href="https://www.buymeacoffee.com/openillust"
               target="_blank"
               rel="noopener noreferrer"
@@ -227,27 +256,24 @@ export default function IllustrationPage() {
             >
               <FaCoffee size={20} />
               <span>Buy me a coffee</span>
-            </a>
+            </Link>
           </div>
 
-          {/* 라이선스 안내 */}
+          {/* License info */}
           <div className="text-sm text-gray-600 space-y-1">
             <p>* Up to 10 free downloads per day. Remaining: {remaining}</p>
             <p>* Commercial use allowed.</p>
             <p>* Modifications and derivative works permitted.</p>
             <p>* Resale or redistribution prohibited.</p>
             <p>
-              * Attribution optional.{' '}
-              <Link
-                href="/info/terms"
-                className="underline text-blue-600 hover:text-blue-800"
-              >
+              * Attribution optional.&nbsp;
+              <Link href="/info/terms" className="underline text-blue-600 hover:text-blue-800">
                 View license
               </Link>
             </p>
           </div>
 
-          {/* 소셜 공유 버튼 */}
+          {/* Social share buttons */}
           <div className="flex gap-4 mt-4">
             <button
               onClick={() =>
@@ -283,17 +309,17 @@ export default function IllustrationPage() {
             </button>
           </div>
 
-          {/* 배너 */}
+          {/* Banner */}
           <div className="mt-6">
             <Banner />
           </div>
         </div>
       </div>
 
-      {/* 연관 이미지 섹션 */}
+      {/* Related Images section */}
       {related.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">이 컬렉션의 다른 이미지</h2>
+          <h2 className="text-xl font-semibold mb-4">Related Images</h2>
           <div className="grid grid-cols-5 gap-4">
             {related.map(img => (
               <Link
@@ -316,7 +342,7 @@ export default function IllustrationPage() {
         </section>
       )}
 
-      {/* 다운로드 포맷 선택 모달 */}
+      {/* Download format selection modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="relative bg-white p-6 rounded shadow max-w-sm w-full">
@@ -369,5 +395,5 @@ export default function IllustrationPage() {
         </div>
       )}
     </main>
-  );
+);
 }
