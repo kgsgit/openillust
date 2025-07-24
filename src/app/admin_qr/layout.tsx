@@ -18,9 +18,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setChecking(false);
-      // 비로그인 상태로 /admin 경로 접근 시 로그인으로 리디렉션
-      if (!session && pathname.startsWith('/admin')) {
-        router.replace('/admin/login');
+      // 비로그인 상태로 /admin_qr 경로 접근 시 로그인으로 리디렉션
+      if (!session && pathname.startsWith('/admin_qr')) {
+        router.replace('/admin_qr/login');
       }
     });
 
@@ -34,9 +34,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }, [supabase, router, pathname]);
 
   const handleLogout = async () => {
-    await fetch('/api/admin/logout', { method: 'POST' });
+    await fetch('/api/admin_qr/logout', { method: 'POST' });
     setSession(null);
-    router.replace('/admin/login');
+    router.replace('/admin_qr/login');
   };
 
   if (checking) {
@@ -50,16 +50,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           {session ? (
             <>
               <nav className="space-x-4">
-                <Link href="/admin" className="text-blue-600 hover:underline">
+                <Link href="/admin_qr" className="text-blue-600 hover:underline">
                   Dashboard
                 </Link>
-                <Link href="/admin/collections" className="text-blue-600 hover:underline">
+                <Link href="/admin_qr/collections" className="text-blue-600 hover:underline">
                   Collections
                 </Link>
-                <Link href="/admin/tags" className="text-blue-600 hover:underline">
+                <Link href="/admin_qr/tags" className="text-blue-600 hover:underline">
                   Tags
                 </Link>
-                <Link href="/admin/settings" className="text-blue-600 hover:underline">
+                <Link href="/admin_qr/settings" className="text-blue-600 hover:underline">
                   Settings
                 </Link>
               </nav>
@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </button>
             </>
           ) : (
-            <Link href="/admin/login" className="text-blue-600 hover:underline">
+            <Link href="/admin_qr/login" className="text-blue-600 hover:underline">
               Login
             </Link>
           )}

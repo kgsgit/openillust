@@ -1,3 +1,4 @@
+// 파일 경로: src/app/admin_qr/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -16,7 +17,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch('/api/admin_qr/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -26,9 +27,9 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(body.error ?? 'Login failed');
       } else {
-        router.replace('/admin');
+        router.replace('/admin_qr');
       }
-    } catch (err) {
+    } catch {
       setError('Network error');
     } finally {
       setLoading(false);
@@ -73,5 +74,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-);
+  );
 }

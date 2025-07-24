@@ -1,3 +1,4 @@
+// 파일 경로: src/app/admin_qr/tags/page.tsx
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
@@ -18,9 +19,9 @@ export default function TagsPage() {
   const fetchTags = async () => {
     setError(null);
     try {
-      const res = await fetch('/api/admin/tags');
+      const res = await fetch('/api/admin_qr/tags');
       if (res.status === 401) {
-        router.replace('/admin/login');
+        router.replace('/admin_qr/login');
         return;
       }
       if (!res.ok) throw new Error('태그 목록을 불러오는 데 실패했습니다.');
@@ -49,13 +50,13 @@ export default function TagsPage() {
 
     setError(null);
     try {
-      const res = await fetch('/api/admin/tags', {
+      const res = await fetch('/api/admin_qr/tags', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
       if (res.status === 401) {
-        router.replace('/admin/login');
+        router.replace('/admin_qr/login');
         return;
       }
       const data = await res.json();
@@ -74,11 +75,9 @@ export default function TagsPage() {
 
     setError(null);
     try {
-      const res = await fetch(`/api/admin/tags/${id}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`/api/admin_qr/tags/${id}`, { method: 'DELETE' });
       if (res.status === 401) {
-        router.replace('/admin/login');
+        router.replace('/admin_qr/login');
         return;
       }
       const data = await res.json();
@@ -91,28 +90,41 @@ export default function TagsPage() {
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>태그 관리</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
+      <h1 className="text-2xl font-semibold mb-4">태그 관리</h1>
 
-      <form onSubmit={handleCreate} style={{ marginBottom: '1rem' }}>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      <form onSubmit={handleCreate} className="flex mb-6">
         <input
           type="text"
           placeholder="새 태그명"
           value={newTag}
           onChange={e => setNewTag(e.target.value)}
           required
+          className="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit">생성</button>
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700 transition"
+        >
+          생성
+        </button>
       </form>
 
-      <ul>
+      <ul className="space-y-2">
         {tags.map(t => (
-          <li key={t.id} style={{ marginBottom: '0.5rem' }}>
-            {t.name} ({t.id})
+          <li
+            key={t.id}
+            className="flex justify-between items-center border-b pb-2"
+          >
+            <span>
+              {t.name}{' '}
+              <span className="text-gray-500">({t.id})</span>
+            </span>
             <button
               onClick={() => handleDelete(t.id)}
-              style={{ marginLeft: '0.5rem' }}
+              className="text-red-600 hover:text-red-800 transition"
             >
               삭제
             </button>
@@ -120,5 +132,5 @@ export default function TagsPage() {
         ))}
       </ul>
     </div>
-);
+  );
 }

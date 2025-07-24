@@ -28,9 +28,9 @@ export default function CollectionsPage() {
   });
 
   const fetchCollections = async () => {
-    const res = await fetch('/api/admin/collections');
+    const res = await fetch('/api/admin_qr/collections');
     if (res.status === 401) {
-      router.replace('/admin/login');
+      router.replace('/admin_qr/login');
       return;
     }
     if (!res.ok) {
@@ -53,7 +53,7 @@ export default function CollectionsPage() {
       return;
     }
     setError(null);
-    const res = await fetch('/api/admin/collections', {
+    const res = await fetch('/api/admin_qr/collections', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -64,7 +64,7 @@ export default function CollectionsPage() {
       }),
     });
     if (res.status === 401) {
-      router.replace('/admin/login');
+      router.replace('/admin_qr/login');
       return;
     }
     const created = await res.json();
@@ -103,13 +103,13 @@ export default function CollectionsPage() {
       setError('이름은 필수입니다.');
       return;
     }
-    const res = await fetch(`/api/admin/collections?id=${editingId}`, {
+    const res = await fetch(`/api/admin_qr/collections?id=${editingId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editFields),
     });
     if (res.status === 401) {
-      router.replace('/admin/login');
+      router.replace('/admin_qr/login');
       return;
     }
     const updated = await res.json();
@@ -123,11 +123,11 @@ export default function CollectionsPage() {
 
   const deleteOne = async (id: number) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    const res = await fetch(`/api/admin/collections?id=${id}`, {
+    const res = await fetch(`/api/admin_qr/collections?id=${id}`, {
       method: 'DELETE',
     });
     if (res.status === 401) {
-      router.replace('/admin/login');
+      router.replace('/admin_qr/login');
       return;
     }
     if (!res.ok) {
