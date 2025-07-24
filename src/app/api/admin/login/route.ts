@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
   // 세션 토큰 추출
   const { access_token, refresh_token, expires_in } = data.session;
 
-  // JSON 응답으로 변경
+  // JSON 응답
   const res = NextResponse.json({ success: true }, { status: 200 });
 
-  // access-token 쿠키 설정
+  // access-token 쿠키 설정 (secure: true 추가)
   res.cookies.set({
     name: `sb-jtdmtrdqhefekqgfxnpf-auth-token`,
     value: JSON.stringify([
@@ -37,9 +37,10 @@ export async function POST(request: NextRequest) {
     maxAge: expires_in,
     path: '/',
     sameSite: 'lax',
+    secure: true
   });
 
-  // refresh-token 쿠키 (HttpOnly)
+  // refresh-token 쿠키 설정 (secure: true 추가)
   res.cookies.set({
     name: `sb-jtdmtrdqhefekqgfxnpf-refresh-token`,
     value: refresh_token,
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
     maxAge: 60 * 60 * 24 * 365 * 10,
     path: '/',
     sameSite: 'lax',
+    secure: true
   });
 
   return res;

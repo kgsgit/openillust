@@ -15,27 +15,51 @@ interface Illustration {
 export default function HomePage() {
   const [latest, setLatest] = useState<Illustration[]>([]);
   const [popular, setPopular] = useState<Illustration[]>([]);
+  const [columns, setColumns] = useState<number>(4);
 
+  // 데이터 페칭
   useEffect(() => {
     (async () => {
-      // 최신 12개 (4컬럼 × 3행)
       const { data: latestData, error: latestError } = await supabase
         .from('illustrations')
         .select('id, title, image_url, created_at')
         .eq('visible', true)
         .order('created_at', { ascending: false })
         .limit(12);
-      if (!latestError && latestData) setLatest(latestData);
+      if (latestData && !latestError) {
+        setLatest(latestData);
+      }
 
-      // 인기 4개 (4컬럼 × 1행)
       const { data: popularData, error: popularError } = await supabase
         .from('illustrations')
         .select('id, title, image_url, created_at')
         .eq('visible', true)
         .order('download_count', { ascending: false })
         .limit(4);
-      if (!popularError && popularData) setPopular(popularData);
+      if (popularData && !popularError) {
+        setPopular(popularData);
+      }
     })();
+  }, []);
+
+  // 반응형 컬럼 수 관리
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setColumns(1);
+      } else if (width < 1024) {
+        setColumns(2);
+      } else {
+        setColumns(4);
+      }
+    };
+
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => {
+      window.removeEventListener('resize', updateColumns);
+    };
   }, []);
 
   return (
@@ -44,17 +68,23 @@ export default function HomePage() {
         <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>
           Not just more images. Only the right ones.
         </h1>
-        <p style={{ maxWidth: '600px', margin: '1rem auto 0', fontSize: '1.125rem', color: '#4B5563' }}>
+        <p
+          style={{
+            maxWidth: '600px',
+            margin: '1rem auto 0',
+            fontSize: '1.125rem',
+            color: '#4B5563',
+          }}
+        >
           No clutter—just ready-to-use illustrations, instantly.
         </p>
       </section>
 
-      {/* 최신 3행 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
             gap: '1rem',
           }}
         >
@@ -62,19 +92,20 @@ export default function HomePage() {
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>{item.title}</h2>
+                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>
+                  {item.title}
+                </h2>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* 인기 1행 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
             gap: '1rem',
           }}
         >
@@ -82,14 +113,15 @@ export default function HomePage() {
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>{item.title}</h2>
+                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>
+                  {item.title}
+                </h2>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* More 버튼 */}
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>
         <Link
           href="/categories"

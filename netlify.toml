@@ -7,13 +7,14 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# API 엔드포인트에 CORS 헤더 적용
+# API 엔드포인트에 CORS 헤더 적용 (Origin 제한)
 [[headers]]
   for = "/api/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Origin = "https://openillust.netlify.app"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Credentials = "true"
 
 # Supabase 스토리지의 public 이미지 요청을 Netlify CDN으로 프록시
 [[redirects]]
