@@ -1,10 +1,9 @@
-// 파일 경로: src/app/admin_qr/upload/page.tsx
-'use client';
-export const dynamic = 'force-dynamic';
+'use client';                                  // 1) 반드시 최상단
+export const dynamic = 'force-dynamic';        // 2) 클라이언트 전용 강제 렌더링
 
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense } from 'react';  // Suspense 임포트 추가
 
 interface Collection {
   id: number;
@@ -20,7 +19,7 @@ export default function UploadPage() {
 }
 
 function SearchParamsComponent() {
-  const router = useRouter();
+  const router = useRouter();  // useRouter()를 여기로 이동
   const params = useSearchParams();
   const id = params.get('id');
 
@@ -46,11 +45,11 @@ function SearchParamsComponent() {
   useEffect(() => {
     (async () => {
       // 1) 컬렉션 목록 (관리자용)
-      const colRes = await fetch('/api/admin_qr/collections', { credentials: 'include' });
+      const colRes = await fetch('/api/admin/collections', { credentials: 'include' });
       if (colRes.ok) setCollections(await colRes.json());
 
       // 2) 태그 목록 (관리자용)
-      const tagRes = await fetch('/api/admin_qr/tags', { credentials: 'include' });
+      const tagRes = await fetch('/api/admin/tags', { credentials: 'include' });
       if (tagRes.ok) {
         const tags: { id: number; name: string }[] = await tagRes.json();
         setTagsList(tags.map(t => t.name));
@@ -82,7 +81,7 @@ function SearchParamsComponent() {
       return;
     }
     setError(null);
-    const res = await fetch('/api/admin_qr/collections', {
+    const res = await fetch('/api/admin/collections', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -107,7 +106,7 @@ function SearchParamsComponent() {
       return;
     }
     setError(null);
-    const res = await fetch('/api/admin_qr/tags', {
+    const res = await fetch('/api/admin/tags', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -139,7 +138,7 @@ function SearchParamsComponent() {
     form.append('visible', visible.toString());
     if (file) form.append('file', file);
 
-    const url = `/api/admin_qr/upload${id ? `?replaceId=${id}` : ''}`;
+    const url = `/api/admin/upload${id ? `?replaceId=${id}` : ''}`;
     const method = id ? 'PATCH' : 'POST';
 
     const res = await fetch(url, { method, credentials: 'include', body: form });
@@ -147,7 +146,7 @@ function SearchParamsComponent() {
     if (!res.ok) {
       setError(result.error || '업로드 요청에 실패했습니다.');
     } else {
-      router.push('/admin_qr');
+      router.push('/admin');
     }
   };
 
@@ -174,7 +173,7 @@ function SearchParamsComponent() {
           />
         </div>
 
-        {/* 설명 */}  
+        {/* 설명 */}
         <div>
           <label className="block font-medium">설명</label>
           <textarea
@@ -299,5 +298,5 @@ function SearchParamsComponent() {
         </button>
       </form>
     </div>
-);
+  );
 }

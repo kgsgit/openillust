@@ -1,4 +1,4 @@
-// src/app/api/admin_qr/tags/[id]/route.ts
+// src/app/api/admin/tags/[id]/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'

@@ -20,7 +20,6 @@ export default function HomePage() {
   // 데이터 페칭
   useEffect(() => {
     (async () => {
-      // 최신 12개
       const { data: latestData, error: latestError } = await supabase
         .from('illustrations')
         .select('id, title, image_url, created_at')
@@ -31,12 +30,11 @@ export default function HomePage() {
         setLatest(latestData);
       }
 
-      // 인기 4개 (SVG 다운로드 기준)
       const { data: popularData, error: popularError } = await supabase
         .from('illustrations')
-        .select('id, title, image_url, created_at, download_count_svg')
+        .select('id, title, image_url, created_at')
         .eq('visible', true)
-        .order('download_count_svg', { ascending: false })
+        .order('download_count', { ascending: false })
         .limit(4);
       if (popularData && !popularError) {
         setPopular(popularData);
@@ -82,7 +80,6 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* 최신 3행 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
@@ -104,7 +101,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 인기 1행 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{

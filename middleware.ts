@@ -9,17 +9,17 @@ export async function middleware(req: NextRequest) {
 
   // 로그인 페이지와 로그인 API는 통과
   if (
-    pathname === '/admin_qr/login' ||
-    pathname === '/api/admin_qr/login'
+    pathname === '/admin/login' ||
+    pathname === '/api/admin/login'
   ) {
     return NextResponse.next();
   }
 
-  // /admin_qr 및 /api/admin_qr 접근 시 세션 체크
+  // /admin 및 /api/admin 접근 시 세션 체크
   if (
-    pathname === '/admin_qr' ||
-    pathname.startsWith('/admin_qr/') ||
-    pathname.startsWith('/api/admin_qr/')
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/') ||
+    pathname.startsWith('/api/admin')
   ) {
     const res = NextResponse.next();
     const supabase = createMiddlewareSupabaseClient({ req, res });
@@ -29,7 +29,7 @@ export async function middleware(req: NextRequest) {
 
     if (!session) {
       const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = '/admin_qr/login';
+      loginUrl.pathname = '/admin/login';
       return NextResponse.redirect(loginUrl);
     }
     return res;
@@ -40,8 +40,8 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin_qr',
-    '/admin_qr/:path*',
-    '/api/admin_qr/:path*',
+    '/admin',
+    '/admin/:path*',
+    '/api/admin/:path*',
   ],
 };

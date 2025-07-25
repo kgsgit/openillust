@@ -1,11 +1,9 @@
-// 파일 경로: src/app/admin_qr/settings/page.tsx
+// 파일 경로: src/app/admin/settings/page.tsx
 'use client';
 
-import React, { useState, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
-  const router = useRouter();
   const [bannerImageUrl, setBannerImageUrl] = useState('');
   const [bannerLinkUrl, setBannerLinkUrl] = useState('');
   const [bannerEnabled, setBannerEnabled] = useState(false);
@@ -14,44 +12,35 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetch('/api/settings')
-      .then(res => {
-        if (res.status === 401) {
-          router.replace('/admin_qr/login');
-          return Promise.reject('Unauthorized');
-        }
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
         setBannerImageUrl(data.banner_image_url || '');
         setBannerLinkUrl(data.banner_link_url || '');
         setBannerEnabled(data.banner_enabled === 'true');
       })
-      .catch(() => {})
+      .catch(console.error)
       .finally(() => setLoading(false));
-  }, [router]);
+  }, []);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-
+    const payload = {
+      banner_image_url: bannerImageUrl,
+      banner_link_url: bannerLinkUrl,
+      banner_enabled: bannerEnabled ? 'true' : 'false'
+    };
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          banner_image_url: bannerImageUrl,
-          banner_link_url: bannerLinkUrl,
-          banner_enabled: bannerEnabled ? 'true' : 'false',
-        }),
+        body: JSON.stringify(payload),
       });
-      if (res.status === 401) {
-        router.replace('/admin_qr/login');
-        return;
-      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setMessage('설정이 저장되었습니다.');
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage('저장 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
@@ -64,7 +53,9 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow">
-      {message && <p className="mb-4 text-center text-green-600">{message}</p>}
+      {message && (
+        <p className="mb-4 text-center text-green-600">{message}</p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label
@@ -117,5 +108,5 @@ export default function SettingsPage() {
         </button>
       </form>
     </div>
-);
+  );
 }
