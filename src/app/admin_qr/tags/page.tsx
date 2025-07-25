@@ -18,9 +18,9 @@ export default function TagsPage() {
   const fetchTags = async () => {
     setError(null);
     try {
-      const res = await fetch('/api/admin/tags');
+      const res = await fetch('/api/admin_qr/tags');
       if (res.status === 401) {
-        router.replace('/admin/login');
+        router.replace('/admin_qr/login');
         return;
       }
       if (!res.ok) throw new Error('태그 목록을 불러오는 데 실패했습니다.');
@@ -49,13 +49,13 @@ export default function TagsPage() {
 
     setError(null);
     try {
-      const res = await fetch('/api/admin/tags', {
+      const res = await fetch('/api/admin_qr/tags', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
       if (res.status === 401) {
-        router.replace('/admin/login');
+        router.replace('/admin_qr/login');
         return;
       }
       const data = await res.json();
@@ -74,11 +74,11 @@ export default function TagsPage() {
 
     setError(null);
     try {
-      const res = await fetch(`/api/admin/tags/${id}`, {
+      const res = await fetch(`/api/admin_qr/tags/${id}`, {
         method: 'DELETE',
       });
       if (res.status === 401) {
-        router.replace('/admin/login');
+        router.replace('/admin_qr/login');
         return;
       }
       const data = await res.json();
@@ -120,5 +120,5 @@ export default function TagsPage() {
         ))}
       </ul>
     </div>
-);
+  );
 }

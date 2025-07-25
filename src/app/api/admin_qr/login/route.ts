@@ -1,5 +1,3 @@
-// 파일 경로: src/app/api/admin/login/route.ts
-
 import { NextResponse, NextRequest } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';

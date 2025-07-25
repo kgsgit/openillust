@@ -16,7 +16,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch('/api/admin_qr/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -26,7 +26,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(body.error ?? 'Login failed');
       } else {
-        router.replace('/admin');
+        router.replace('/admin_qr');
       }
     } catch (err) {
       setError('Network error');
@@ -73,5 +73,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-);
+  );
 }

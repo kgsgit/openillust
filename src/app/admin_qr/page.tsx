@@ -1,4 +1,3 @@
-// 파일 경로: src/app/admin/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -118,7 +117,7 @@ export default function AdminDashboard() {
   const handleDelete = async (id: number) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`/api/admin/upload?deleteId=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin_qr/upload?deleteId=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error((await res.json()).error || '삭제 실패');
       fetchData();
     } catch (err: any) {
@@ -185,7 +184,7 @@ export default function AdminDashboard() {
         </select>
 
         <button
-          onClick={() => (window.location.href = '/admin/upload')}
+          onClick={() => (window.location.href = '/admin_qr/upload')}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           New Upload
@@ -224,7 +223,7 @@ export default function AdminDashboard() {
               <td className="border px-2 py-1">{item.download_count_png}</td>
               <td className="border px-2 py-1">{new Date(item.created_at).toLocaleString()}</td>
               <td className="border px-2 py-1">
-                <Link href={`/admin/upload?id=${item.id}`} className="mr-2 text-blue-600 hover:underline">
+                <Link href={`/admin_qr/upload?id=${item.id}`} className="mr-2 text-blue-600 hover:underline">
                   Edit
                 </Link>
                 <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:underline">

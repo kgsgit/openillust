@@ -45,11 +45,11 @@ function SearchParamsComponent() {
   useEffect(() => {
     (async () => {
       // 1) 컬렉션 목록 (관리자용)
-      const colRes = await fetch('/api/admin/collections', { credentials: 'include' });
+      const colRes = await fetch('/api/admin_qr/collections', { credentials: 'include' });
       if (colRes.ok) setCollections(await colRes.json());
 
       // 2) 태그 목록 (관리자용)
-      const tagRes = await fetch('/api/admin/tags', { credentials: 'include' });
+      const tagRes = await fetch('/api/admin_qr/tags', { credentials: 'include' });
       if (tagRes.ok) {
         const tags: { id: number; name: string }[] = await tagRes.json();
         setTagsList(tags.map(t => t.name));
@@ -81,7 +81,7 @@ function SearchParamsComponent() {
       return;
     }
     setError(null);
-    const res = await fetch('/api/admin/collections', {
+    const res = await fetch('/api/admin_qr/collections', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -106,7 +106,7 @@ function SearchParamsComponent() {
       return;
     }
     setError(null);
-    const res = await fetch('/api/admin/tags', {
+    const res = await fetch('/api/admin_qr/tags', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -138,7 +138,7 @@ function SearchParamsComponent() {
     form.append('visible', visible.toString());
     if (file) form.append('file', file);
 
-    const url = `/api/admin/upload${id ? `?replaceId=${id}` : ''}`;
+    const url = `/api/admin_qr/upload${id ? `?replaceId=${id}` : ''}`;
     const method = id ? 'PATCH' : 'POST';
 
     const res = await fetch(url, { method, credentials: 'include', body: form });
@@ -146,7 +146,7 @@ function SearchParamsComponent() {
     if (!res.ok) {
       setError(result.error || '업로드 요청에 실패했습니다.');
     } else {
-      router.push('/admin');
+      router.push('/admin_qr');
     }
   };
 
