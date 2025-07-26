@@ -29,7 +29,7 @@ export default function Header() {
 
   const scroll = (dir: 'left' | 'right') => {
     if (!sliderRef.current) return;
-    const step = sliderRef.current.clientWidth * 0.5;
+    const step = sliderRef.current.clientWidth * 0.8;
     sliderRef.current.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
 
@@ -44,8 +44,8 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-md">
-      <div className="max-w-screen-xl mx-auto flex items-center justify-between flex-nowrap px-4 py-3">
-        {/* 로고 */}
+      <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3">
+        {/* 로고 (현재 설정으로 문제 없음) */}
         <Link href="/" className="flex-shrink-0 mr-4">
           <img src="/logo.png" alt="Openillust" className="h-8 w-auto object-contain" />
         </Link>
@@ -54,23 +54,23 @@ export default function Header() {
         <div className="relative flex-1 min-w-0 flex items-center">
           <button
             onClick={() => scroll('left')}
-            className="flex-shrink-0 px-1 text-gray-500 hover:text-gray-800 z-10"
+            className="flex-shrink-0 px-2 text-gray-500 hover:text-gray-800 z-10"
             aria-label="이전 컬렉션"
           >
             ‹
           </button>
           <div
             ref={sliderRef}
-            className="flex flex-nowrap gap-0.5 overflow-x-auto hide-scrollbar flex-1"
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
+            className="flex flex-nowrap gap-2 overflow-x-auto hide-scrollbar flex-1 snap-x snap-mandatory"
             style={{ scrollBehavior: 'smooth' }}
           >
             {collections.map(c => (
               <Link
                 key={c.id}
                 href={`/collections/${c.id}`}
-                className="flex-shrink-0 text-center p-1 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6"
+                className="flex-shrink-0 snap-center text-center p-1 max-[460px]:w-full w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6"
               >
                 <img
                   src={c.thumbnail_url || '/placeholder.png'}
@@ -83,7 +83,7 @@ export default function Header() {
           </div>
           <button
             onClick={() => scroll('right')}
-            className="flex-shrink-0 px-1 text-gray-500 hover:text-gray-800 z-10"
+            className="flex-shrink-0 px-2 text-gray-500 hover:text-gray-800 z-10"
             aria-label="다음 컬렉션"
           >
             ›
@@ -118,22 +118,14 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* 모바일 네비게이션 (헤더 바로 아래에 표시) */}
+      {/* 모바일 네비게이션 */}
       {menuOpen && (
         <nav className="md:hidden bg-white shadow-inner">
           <div className="max-w-screen-xl mx-auto px-4 py-2 flex flex-col space-y-1">
-            <Link href="/categories" className="p-2">
-              Categories
-            </Link>
-            <Link href="/collections" className="p-2">
-              Collections
-            </Link>
-            <Link href="/popular" className="p-2">
-              Popular
-            </Link>
-            <Link href="/info/about" className="p-2">
-              About
-            </Link>
+            <Link href="/categories" className="p-2">Categories</Link>
+            <Link href="/collections" className="p-2">Collections</Link>
+            <Link href="/popular" className="p-2">Popular</Link>
+            <Link href="/info/about" className="p-2">About</Link>
           </div>
         </nav>
       )}

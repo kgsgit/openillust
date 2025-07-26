@@ -1,3 +1,4 @@
+// 파일 경로: src/app/privacy/page.tsx
 import Image from "next/image";
 
 export const metadata = {
@@ -22,7 +23,7 @@ export default function PrivacyPage() {
           alt="ice cream"
           width={400}
           height={400}
-          className="mx-auto mt-4"
+          className="mx-auto mt-4 w-auto h-auto"
         />
       </section>
 

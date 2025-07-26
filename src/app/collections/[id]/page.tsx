@@ -55,7 +55,7 @@ export default async function CollectionDetailPage(input: {
   const totalPages = Math.ceil(totalItems / perPage);
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
+    <main style={{ maxWidth: 1200, margin: 'auto', padding: '0.5rem 3rem' }}>
       <h1 className="text-3xl font-bold my-8">Collections</h1>
 
       <div className="flex items-center space-x-4 mb-8">

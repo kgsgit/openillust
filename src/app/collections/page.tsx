@@ -33,7 +33,7 @@ export default async function CollectionsPage() {
     <main className="max-w-5xl mx-auto p-6 pt-10">
       {/* 이제 상단 네비부터 충분한 여유가 생깁니다 */}
       <h1 className="text-3xl font-bold mb-6">Collections</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {collections.map((col) => (
           <div
             key={col.id}

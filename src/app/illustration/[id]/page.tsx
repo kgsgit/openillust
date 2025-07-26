@@ -282,7 +282,7 @@ export default function IllustrationPage() {
               }
               className="flex items-center gap-2 px-2 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
             >
-              <FaFacebookF size={20} />
+              <FaFacebookF size={15} />
             </button>
             <button
               onClick={() =>
@@ -295,13 +295,13 @@ export default function IllustrationPage() {
               }
               className="flex items-center gap-2 px-2 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
             >
-              <FaTwitter size={20} />
+              <FaTwitter size={15} />
             </button>
             <button
               onClick={() => navigator.share?.({ url: window.location.href })}
               className="flex items-center gap-2 px-2 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
-              <FaShareAlt size={20} />
+              <FaShareAlt size={15} />
             </button>
           </div>
 
