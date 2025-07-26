@@ -34,7 +34,7 @@ export default function HomePage() {
         .from('illustrations')
         .select('id, title, image_url, created_at')
         .eq('visible', true)
-        .order('download_count', { ascending: false })
+        .order('download_count_svg', { ascending: false })
         .limit(4);
       if (popularData && !popularError) {
         setPopular(popularData);
