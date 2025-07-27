@@ -13,20 +13,23 @@ type Illustration = {
 };
 
 export default async function PopularPage() {
-  // visible 필터 및 다운로드 수 기준 정렬하여 상위 20개 추출
+  // 1) visible 필터로 모든 항목 불러오기
   const { data, error } = await supabase
     .from('illustrations')
     .select('id, title, image_url, download_count_svg, download_count_png')
-    .eq('visible', true)
-    .order('download_count_svg', { ascending: false })
-    .order('download_count_png', { ascending: false })
-    .limit(20);
+    .eq('visible', true);
 
   if (error) {
     throw new Error(`Failed to load popular illustrations: ${error.message}`);
   }
 
-  const items: Illustration[] = data || [];
+  // 2) 총 다운로드 수(download_count_svg + download_count_png) 기준으로 내림차순 정렬 후 상위 20개 추출
+  const items: Illustration[] = (data || [])
+    .sort((a, b) => 
+      (b.download_count_svg + b.download_count_png) - 
+      (a.download_count_svg + a.download_count_png)
+    )
+    .slice(0, 20);
 
   return (
     <main style={{ maxWidth: 1200, margin: 'auto', padding: '1.5rem 2.5rem' }}>
