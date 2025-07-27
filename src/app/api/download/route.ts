@@ -42,19 +42,22 @@ export async function GET(request: NextRequest) {
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     'unknown';
 
-  // 5) 오늘자 IP별 다운로드 횟수 확인(10회 초과 시 차단)
+  // 5) 오늘자 IP별 전체 다운로드 횟수 확인(10회 초과 시 차단)
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
-  const { count: ipCount, error: ipError } = await supabaseAdmin
+  const { data: logs, count: ipCount, error: ipError } = await supabaseAdmin
     .from('download_logs')
-    .select('id', { head: true, count: 'exact' })
-    .eq('illustration_id', illustrationId)
+    .select('id', { count: 'exact' })
     .eq('ip_address', ip)
     .gte('created_at', todayStart.toISOString());
+
   if (ipError) {
     console.error('⚠️ IP count check error:', ipError);
-  } else if ((ipCount ?? 0) >= 10) {
-    return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
+  } else {
+    console.log(`⚙️ [IP Block] ${ip} has downloaded total ${ipCount} times today`);
+    if ((ipCount ?? 0) >= 10) {
+      return NextResponse.json({ error: 'IP download limit reached' }, { status: 403 });
+    }
   }
 
   // 6) signed 모드일 때만 RPC 호출 (로그 삽입 + 카운트 증가)
@@ -83,7 +86,7 @@ export async function GET(request: NextRequest) {
   const origPath = illust.image_path!;
   const publicUrl = illust.image_url;
 
-  // 8) 항상 SVG 원본 경로 사용
+  // 8) 항상 SVG 원본 경로 사용 할것
   const requestedPath = origPath;
 
   // 9) 파일 반환

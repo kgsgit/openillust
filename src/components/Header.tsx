@@ -1,4 +1,4 @@
-// 파일 경로: src/components/Header.tsx
+// src/components/Header.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -45,16 +45,16 @@ export default function Header() {
   return (
     <header className="bg-white shadow-md">
       <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3">
-        {/* 로고 (현재 설정으로 문제 없음) */}
+        {/* 로고 */}
         <Link href="/" className="flex-shrink-0 mr-4">
           <img src="/logo.png" alt="Openillust" className="h-8 w-auto object-contain" />
         </Link>
 
         {/* 컬렉션 슬라이더 */}
-        <div className="relative flex-1 min-w-0 flex items-center">
+        <div className="relative w-2/5 min-w-0 flex items-center">
           <button
             onClick={() => scroll('left')}
-            className="flex-shrink-0 px-2 text-gray-500 hover:text-gray-800 z-10"
+            className="flex-shrink-0 px-1 text-gray-500 hover:text-gray-800 z-10"
             aria-label="이전 컬렉션"
           >
             ‹
@@ -83,7 +83,7 @@ export default function Header() {
           </div>
           <button
             onClick={() => scroll('right')}
-            className="flex-shrink-0 px-2 text-gray-500 hover:text-gray-800 z-10"
+            className="flex-shrink-0 px-1 text-gray-500 hover:text-gray-800 z-10"
             aria-label="다음 컬렉션"
           >
             ›

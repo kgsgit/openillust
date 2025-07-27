@@ -31,13 +31,7 @@ export default function Footer() {
 
         {/* 보안·라이선스·호스팅 배지 */}
         <div className="flex flex-wrap items-center gap-4">
-          {/* 1. HTTPS Secure */}
-          <div className="flex items-center gap-1">
-            <span role="img" aria-label="secure">🔒</span>
-            <span>HTTPS Secure</span>
-          </div>
-
-          {/* 2. CC BY 4.0 (외부 URL) */}
+          {/* 1. CC BY 4.0 (외부 URL) */}
           <div className="flex items-center gap-1">
             <img
               src="https://licensebuttons.net/l/by/4.0/88x31.png"
@@ -54,7 +48,7 @@ export default function Footer() {
             </Link>
           </div>
 
-          {/* 4. Netlify 배지 (외부 URL) */}
+          {/* 2. Netlify 배지 (외부 URL) */}
           <div className="flex items-center gap-1">
             <img
               src="https://www.netlify.com/img/global/badges/netlify-color-bg.svg"
@@ -65,5 +59,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+   );
 }
