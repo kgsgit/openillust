@@ -51,7 +51,7 @@ export default function Header() {
         </Link>
 
         {/* 컬렉션 슬라이더 */}
-        <div className="relative flex-1 min-w-0 flex items-center">
+        <div className="relative w-2/5 min-w-0 flex items-center">
           <button
             onClick={() => scroll('left')}
             className="flex-shrink-0 px-1 text-gray-500 hover:text-gray-800 z-10"
