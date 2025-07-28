@@ -22,21 +22,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <title>손에 잡히는 이미지, 쓰임을 생각한 큐레이션.</title>
+        <title>Images at Your Fingertips, Curated for Purpose.</title>
         <meta
           name="description"
-          content="Openillust는 단순히 이미지가 많은 곳이 아닙니다. 불필요한 반복 없이, 실제로 쓸 수 있는 그림만을 선별해 담았습니다. 모든 일러스트는 정제된 기준에 따라 고르고 다듬었습니다. 당신의 창의력과 감성을 방해하지 않는 조용한 도구가 되겠습니다. 복잡한 조건 없이, 원하는 이미지를 바로 사용할 수 있습니다."
+          content="Openillust is not just a repository of images. We curate only the ones you can actually use, without unnecessary repetition. Each illustration is chosen and refined according to rigorous criteria. A quiet tool that won’t hinder your creativity. No complex requirements—just the images you need, ready to use."
         />
-        <meta property="og:title" content="손에 잡히는 이미지, 쓰임을 생각한 큐레이션." />
+        <meta property="og:title" content="Images at Your Fingertips, Curated for Purpose." />
         <meta
           property="og:description"
-          content="Openillust는 단순히 이미지가 많은 곳이 아닙니다. 불필요한 반복 없이, 실제로 쓸 수 있는 그림만을 선별해 담았습니다. 모든 일러스트는 정제된 기준에 따라 고르고 다듬었습니다. 당신의 창의력과 감성을 방해하지 않는 조용한 도구가 되겠습니다. 복잡한 조건 없이, 원하는 이미지를 바로 사용할 수 있습니다."
+          content="Openillust is not just a repository of images. We curate only the ones you can actually use, without unnecessary repetition. Each illustration is chosen and refined according to rigorous criteria. A quiet tool that won’t hinder your creativity. No complex requirements—just the images you need, ready to use."
         />
-        <meta property="og:url" content="https://openillust.netlify.app" />
+        <meta property="og:url" content="https://www.openillust.com" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://openillust.netlify.app/og-image.png" />
+        <meta property="og:image" content="https://www.openillust.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://openillust.netlify.app" />
+        <link rel="canonical" href="https://www.openillust.com" />
       </head>
       <body>
         <Header />
