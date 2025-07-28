@@ -1,4 +1,4 @@
-// 파일 경로: src/components/Footer.tsx
+// src/components/Footer.tsx
 'use client';
 
 import React from 'react';
@@ -14,10 +14,10 @@ export default function Footer() {
             About
           </Link>
           <Link href="/info/policy" className="hover:underline">
-            Privacy&nbsp;Policy
+            Privacy Policy
           </Link>
           <Link href="/info/terms" className="hover:underline">
-            Terms&nbsp;of&nbsp;Service
+            Terms of Service
           </Link>
           <Link href="/info/contact" className="hover:underline">
             Contact
@@ -29,9 +29,9 @@ export default function Footer() {
           © {new Date().getFullYear()} Openillust. All rights reserved.
         </div>
 
-        {/* 보안·라이선스·호스팅 배지 */}
+        {/* 보안·라이선스 배지 */}
         <div className="flex flex-wrap items-center gap-4">
-          {/* 1. CC BY 4.0 (외부 URL) */}
+          {/* CC BY 4.0 (외부 URL) */}
           <div className="flex items-center gap-1">
             <img
               src="https://licensebuttons.net/l/by/4.0/88x31.png"
@@ -47,17 +47,8 @@ export default function Footer() {
               CC BY 4.0
             </Link>
           </div>
-
-          {/* 2. Netlify 배지 (외부 URL) */}
-          <div className="flex items-center gap-1">
-            <img
-              src="https://www.netlify.com/img/global/badges/netlify-color-bg.svg"
-              alt="Netlify"
-              className="h-4 inline"
-            />
-          </div>
         </div>
       </div>
     </footer>
-   );
+  );
 }
