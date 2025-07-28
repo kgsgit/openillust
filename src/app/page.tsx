@@ -1,4 +1,4 @@
-// 파일 경로: src/app/page.tsx
+// src/app/page.tsx
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -17,7 +17,7 @@ export default function HomePage() {
   const [popular, setPopular] = useState<Illustration[]>([]);
   const [columns, setColumns] = useState<number>(4);
 
-  // 데이터 페칭
+  // 데이터 페칭: 최신 최대 12개, 인기 최대 8개
   useEffect(() => {
     (async () => {
       const { data: latestData, error: latestError } = await supabase
@@ -26,19 +26,15 @@ export default function HomePage() {
         .eq('visible', true)
         .order('created_at', { ascending: false })
         .limit(12);
-      if (latestData && !latestError) {
-        setLatest(latestData);
-      }
+      if (latestData && !latestError) setLatest(latestData);
 
       const { data: popularData, error: popularError } = await supabase
         .from('illustrations')
         .select('id, title, image_url, created_at')
         .eq('visible', true)
         .order('download_count_svg', { ascending: false })
-        .limit(4);
-      if (popularData && !popularError) {
-        setPopular(popularData);
-      }
+        .limit(8);
+      if (popularData && !popularError) setPopular(popularData);
     })();
   }, []);
 
@@ -46,21 +42,18 @@ export default function HomePage() {
   useEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
-      if (width < 640) {
-        setColumns(1);
-      } else if (width < 1024) {
-        setColumns(2);
-      } else {
-        setColumns(4);
-      }
+      if (width < 640) setColumns(1);
+      else if (width < 1024) setColumns(2);
+      else setColumns(4);
     };
-
     updateColumns();
     window.addEventListener('resize', updateColumns);
-    return () => {
-      window.removeEventListener('resize', updateColumns);
-    };
+    return () => window.removeEventListener('resize', updateColumns);
   }, []);
+
+  // 최신 3행, 인기 2행으로 자르기
+  const latestItems = latest.slice(0, columns * 3);
+  const popularItems = popular.slice(0, columns * 2);
 
   return (
     <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
@@ -80,6 +73,7 @@ export default function HomePage() {
         </p>
       </section>
 
+      {/* 최신 3행 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
@@ -88,7 +82,7 @@ export default function HomePage() {
             gap: '1rem',
           }}
         >
-          {latest.map(item => (
+          {latestItems.map(item => (
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
@@ -101,6 +95,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 인기순 2행 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
@@ -109,7 +104,7 @@ export default function HomePage() {
             gap: '1rem',
           }}
         >
-          {popular.map(item => (
+          {popularItems.map(item => (
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
