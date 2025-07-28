@@ -6,7 +6,7 @@ import { FC } from 'react';
 interface ThumbnailImageProps {
   /** 이미지 URL */
   src: string;
-  /** alt 텍스트 */
+  /** alt 텍스트이다 */
   alt?: string;
 }
 
@@ -32,6 +32,6 @@ const ThumbnailImage: FC<ThumbnailImageProps> = ({
       />
     </div>
   );
-};
+ };
 
 export default ThumbnailImage;
