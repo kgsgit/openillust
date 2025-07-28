@@ -37,6 +37,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta property="og:image" content="https://www.openillust.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href="https://www.openillust.com" />
+
+        {/* Google AdSense code snippet */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2152944666199864"
+          crossOrigin="anonymous"
+        ></script>
       </head>
       <body>
         <Header />
