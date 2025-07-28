@@ -1,4 +1,4 @@
-// 파일 경로: src/app/collections/page.tsx
+// src/app/collections/page.tsx
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
@@ -12,7 +12,6 @@ export interface Collection {
   thumbnail2_url: string | null;
 }
 
-// null-safe CDN URL 변환 함수
 function toCdnUrl(raw?: string | null): string {
   if (!raw) return '';
   const m = raw.match(/public\/illustrations\/images\/(.+)$/);
@@ -31,7 +30,6 @@ export default async function CollectionsPage() {
 
   return (
     <main className="max-w-5xl mx-auto p-6 pt-10">
-      {/* 이제 상단 네비부터 충분한 여유가 생깁니다 */}
       <h1 className="text-3xl font-bold mb-6">Collections</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {collections.map((col) => (
@@ -44,7 +42,6 @@ export default async function CollectionsPage() {
                 <ThumbnailImage
                   src={toCdnUrl(col.thumbnail2_url)}
                   alt={`${col.name} 썸네일`}
-                  ratio={75}
                 />
               )}
             </Link>
