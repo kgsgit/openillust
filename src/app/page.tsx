@@ -1,4 +1,4 @@
-// src/app/page.tsx
+// 파일 경로: src/app/page.tsx
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -51,10 +51,6 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', updateColumns);
   }, []);
 
-  // 최신 3행, 인기 2행으로 자르기
-  const latestItems = latest.slice(0, columns * 3);
-  const popularItems = popular.slice(0, columns * 2);
-
   return (
     <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
       <section style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -73,7 +69,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* 최신 3행 */}
+      {/* 최신 전체 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
@@ -82,7 +78,7 @@ export default function HomePage() {
             gap: '1rem',
           }}
         >
-          {latestItems.map(item => (
+          {latest.map(item => (
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
@@ -95,7 +91,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 인기순 2행 */}
+      {/* 인기 전체 */}
       <section style={{ marginBottom: '2rem' }}>
         <div
           style={{
@@ -104,7 +100,7 @@ export default function HomePage() {
             gap: '1rem',
           }}
         >
-          {popularItems.map(item => (
+          {popular.map(item => (
             <Link href={`/illustration/${item.id}`} key={item.id}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
               <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>

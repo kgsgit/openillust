@@ -1,5 +1,4 @@
 // 파일 경로: src/app/illustration/[id]/page.tsx
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -94,17 +93,12 @@ export default function IllustrationPage() {
       return;
     }
 
-    // 4-1) permission check only
     const permRes = await fetch(
       `/api/download?illustration=${illustrationId}&format=${fmt}`
     );
     const permJson = await permRes.json();
-    if (!permRes.ok) {
+    if (!permRes.ok || permJson.error) {
       alert(permJson.error || 'Download failed.');
-      return;
-    }
-    if (permJson.error) {
-      alert(permJson.error);
       return;
     }
 
@@ -236,11 +230,7 @@ export default function IllustrationPage() {
             <button
               onClick={() => setShowModal(true)}
               disabled={remaining <= 0}
-              className={`px-4 py-2 text-white rounded ${
-                remaining > 0
-                  ? 'bg-blue-600 hover:bg-blue-700'
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
+              className={`px-4 py-2 text-white rounded ${remaining > 0 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
             >
               Download
             </button>
@@ -274,9 +264,7 @@ export default function IllustrationPage() {
             <button
               onClick={() =>
                 window.open(
-                  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                    window.location.href
-                  )}`,
+                  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
                   '_blank'
                 )
               }
@@ -287,9 +275,7 @@ export default function IllustrationPage() {
             <button
               onClick={() =>
                 window.open(
-                  `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                    window.location.href
-                  )}&text=Check%20out%20this%20image!`,
+                  `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=Check%20out%20this%20image!`,
                   '_blank'
                 )
               }
@@ -316,12 +302,12 @@ export default function IllustrationPage() {
       {related.length > 0 && (
         <section className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Related Images</h2>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid gap-4 overflow-x-auto pb-2 grid-flow-col grid-rows-2 md:grid-flow-row md:grid-cols-5 md:grid-rows-1">
             {related.map(img => (
               <Link
                 key={img.id}
                 href={`/illustration/${img.id}`}
-                className="relative block overflow-hidden rounded"
+                className="relative block overflow-hidden rounded flex-shrink-0 w-[40vw] md:w-full"
               >
                 <img
                   src={toCdnUrl(img.image_url)}
@@ -390,5 +376,5 @@ export default function IllustrationPage() {
         </div>
       )}
     </main>
-  );
+);
 }
