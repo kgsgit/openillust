@@ -1,4 +1,4 @@
-// src/app/layout.tsx
+// 파일 경로: src/app/layout.tsx
 'use client';
 
 import { useEffect } from 'react';
@@ -41,8 +41,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* Google AdSense code snippet */}
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2152944666199864"
-          crossOrigin="anonymous"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+          data-ad-client="ca-pub-2152944666199864"
         ></script>
       </head>
       <body>
