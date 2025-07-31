@@ -1,24 +1,12 @@
 // 파일 경로: src/app/layout.tsx
-'use client';
-
-import { useEffect } from 'react';
 import '@/styles/globals.css';
 import '@/styles/modal.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ClientOnly from '@/components/ClientOnly';
 import { ReactNode } from 'react';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    const disableContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-    document.addEventListener('contextmenu', disableContextMenu);
-    return () => {
-      document.removeEventListener('contextmenu', disableContextMenu);
-    };
-  }, []);
-
   return (
     <html lang="en">
       <head>
@@ -43,9 +31,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
           data-ad-client="ca-pub-2152944666199864"
+          crossOrigin="anonymous"
         ></script>
       </head>
       <body>
+        <ClientOnly />
         <Header />
         {children}
         <Footer />

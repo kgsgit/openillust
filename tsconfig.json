@@ -31,11 +31,10 @@
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
-, "src/app/api/categories/route.ts"  ],
+    ".next/types/**/*.ts",
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules"
   ]

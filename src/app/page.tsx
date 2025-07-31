@@ -1,7 +1,5 @@
 // 파일 경로: src/app/page.tsx
-'use client';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 import ThumbnailImage from '@/components/ThumbnailImage';
 import Link from 'next/link';
 
@@ -12,119 +10,66 @@ interface Illustration {
   created_at: string;
 }
 
-export default function HomePage() {
-  const [latest, setLatest] = useState<Illustration[]>([]);
-  const [popular, setPopular] = useState<Illustration[]>([]);
-  const [columns, setColumns] = useState<number>(4);
+export default async function HomePage() {
+  const { data: latestData } = await supabaseAdmin
+    .from('illustrations')
+    .select('id, title, image_url, created_at')
+    .eq('visible', true)
+    .order('created_at', { ascending: false })
+    .limit(12);
+  const latest: Illustration[] = latestData ?? [];
 
-  // 데이터 페칭: 최신 최대 12개, 인기 최대 8개
-  useEffect(() => {
-    (async () => {
-      const { data: latestData, error: latestError } = await supabase
-        .from('illustrations')
-        .select('id, title, image_url, created_at')
-        .eq('visible', true)
-        .order('created_at', { ascending: false })
-        .limit(12);
-      if (latestData && !latestError) setLatest(latestData);
-
-      const { data: popularData, error: popularError } = await supabase
-        .from('illustrations')
-        .select('id, title, image_url, created_at')
-        .eq('visible', true)
-        .order('download_count_svg', { ascending: false })
-        .limit(8);
-      if (popularData && !popularError) setPopular(popularData);
-    })();
-  }, []);
-
-  // 반응형 컬럼 수 관리
-  useEffect(() => {
-    const updateColumns = () => {
-      const width = window.innerWidth;
-      if (width < 640) setColumns(1);
-      else if (width < 1024) setColumns(2);
-      else setColumns(4);
-    };
-    updateColumns();
-    window.addEventListener('resize', updateColumns);
-    return () => window.removeEventListener('resize', updateColumns);
-  }, []);
+  const { data: popularData } = await supabaseAdmin
+    .from('illustrations')
+    .select('id, title, image_url, created_at')
+    .eq('visible', true)
+    .order('download_count_svg', { ascending: false })
+    .limit(8);
+  const popular: Illustration[] = popularData ?? [];
 
   return (
-    <main style={{ maxWidth: 1200, margin: 'auto', padding: '2rem' }}>
-      <section style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>
+    <main className="max-w-screen-xl mx-auto px-4 py-8">
+      <section className="text-center mb-8">
+        <h1 className="text-2xl font-bold">
           Not just more images. Only the right ones.
         </h1>
-        <p
-          style={{
-            maxWidth: '600px',
-            margin: '1rem auto 0',
-            fontSize: '1.125rem',
-            color: '#4B5563',
-          }}
-        >
+        <p className="mt-4 text-lg text-gray-700">
           No clutter—just ready-to-use illustrations, instantly.
         </p>
       </section>
 
-      {/* 최신 전체 */}
-      <section style={{ marginBottom: '2rem' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${columns}, 1fr)`,
-            gap: '1rem',
-          }}
-        >
+      {/* 최신 일러스트 전체 */}
+      <section className="mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {latest.map(item => (
-            <Link href={`/illustration/${item.id}`} key={item.id}>
+            <Link key={item.id} href={`/illustration/${item.id}`}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
-              <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>
-                  {item.title}
-                </h2>
-              </div>
+              <h2 className="mt-2 text-center text-base font-medium">
+                {item.title}
+              </h2>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* 인기 전체 */}
-      <section style={{ marginBottom: '2rem' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${columns}, 1fr)`,
-            gap: '1rem',
-          }}
-        >
+      {/* 인기 일러스트 전체 */}
+      <section className="mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {popular.map(item => (
-            <Link href={`/illustration/${item.id}`} key={item.id}>
+            <Link key={item.id} href={`/illustration/${item.id}`}>
               <ThumbnailImage src={item.image_url} alt={item.title} />
-              <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 500 }}>
-                  {item.title}
-                </h2>
-              </div>
+              <h2 className="mt-2 text-center text-base font-medium">
+                {item.title}
+              </h2>
             </Link>
           ))}
         </div>
       </section>
 
-      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+      <div className="text-center">
         <Link
           href="/categories"
-          style={{
-            display: 'inline-block',
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#1f2937',
-            color: '#ffffff',
-            borderRadius: '0.375rem',
-            textDecoration: 'none',
-            fontWeight: 500,
-          }}
+          className="inline-block px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
         >
           More
         </Link>
