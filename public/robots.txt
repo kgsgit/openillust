@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.openillust.com/sitemap.xml
+Sitemap: https://openillust.com/sitemap.xml
