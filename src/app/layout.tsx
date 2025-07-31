@@ -5,6 +5,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ClientOnly from '@/components/ClientOnly';
 import { ReactNode } from 'react';
+import Script from 'next/script';
+
+const GA_ID = 'G-J0QHBDLF6F'; // ← 복사해둔 측정 ID
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -33,6 +36,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           data-ad-client="ca-pub-2152944666199864"
           crossOrigin="anonymous"
         ></script>
+
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
       </head>
       <body>
         <ClientOnly />
