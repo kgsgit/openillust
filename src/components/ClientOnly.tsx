@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
-export default function ClientOnly() {
+interface ClientOnlyProps {
+  children: ReactNode;
+}
+
+export default function ClientOnly({ children }: ClientOnlyProps) {
+  const [hasMounted, setHasMounted] = useState(false);
+
   useEffect(() => {
-    const disableContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-    document.addEventListener('contextmenu', disableContextMenu);
-    return () => {
-      document.removeEventListener('contextmenu', disableContextMenu);
-    };
+    setHasMounted(true);
   }, []);
 
-  return null;
+  if (!hasMounted) {
+    return null;
+  }
+
+  return <>{children}</>;
 }

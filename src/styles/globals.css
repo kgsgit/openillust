@@ -1,7 +1,9 @@
+/* Tailwind base, components, utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 스크롤바 숨기기 유틸 */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -10,19 +12,16 @@
   scrollbar-width: none;
 }
 
-
-/* globals.css 등 전역 스타일 파일에 추가 */
+/* 항상 수직 스크롤바 활성화 (화면 흔들림 방지) */
 html {
   overflow-y: scroll;
 }
-
-
 
 /* --- Watermark Overlay --- */
 .watermark-wrapper {
   position: relative;
   overflow: hidden;
-  display: inline-block; /* block 계열이라면 block 으로 바꿔도 됩니다 */
+  display: inline-block;
 }
 
 .watermark-wrapper .illustration-image {
@@ -31,18 +30,13 @@ html {
   height: auto;
 }
 
-/* ::after 로 SVG 패턴을 반복 적용 */
 .watermark-wrapper::after {
   content: "";
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>\
-  <text x='0' y='100' transform='rotate(-45)' \
-fill='rgba(255,255,255,0.250' font-size='20' \
-font-family='Arial,sans-serif'>openillust</text>\
-</svg>");
+  /* SVG 데이터 URI를 한 줄로 합쳐야 문법 오류가 없습니다 */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="0" y="100" transform="rotate(-45)" fill="rgba(255,255,255,0.25)" font-size="20" font-family="Arial,sans-serif">openillust</text></svg>');
   background-repeat: repeat;
   z-index: 10;
 }

@@ -1,4 +1,6 @@
-// 파일 경로: src/app/page.tsx
+// ① ISR 설정: 60초마다 페이지 갱신
+export const revalidate = 60;
+
 import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 import ThumbnailImage from '@/components/ThumbnailImage';
 import Link from 'next/link';
@@ -38,7 +40,7 @@ export default async function HomePage() {
         </p>
       </section>
 
-      {/* 최신 일러스트 전체 */}
+      {/* 최신 일러스트 */}
       <section className="mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {latest.map(item => (
@@ -52,7 +54,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 인기 일러스트 전체 */}
+      {/* 인기 일러스트 */}
       <section className="mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {popular.map(item => (
@@ -75,5 +77,5 @@ export default async function HomePage() {
         </Link>
       </div>
     </main>
-  );
+);
 }
