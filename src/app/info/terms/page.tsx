@@ -82,7 +82,7 @@ export default function TermsPage() {
           <h2 className="text-xl font-semibold mb-4">7. Contact</h2>
           <p>
             Questions or concerns? Email us at{" "}
-            <a href="mailto:support@openillust.com" className="underline">
+            <a href="mailto:openillust@gmail.com" className="underline">
               support@openillust.com
             </a>.
           </p>
