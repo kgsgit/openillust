@@ -12,6 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <title>Images at Your Fingertips, Curated for Purpose.</title>
         <link rel="canonical" href="https://openillust.com/" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js?client=ca-pub-2152944666199864"
