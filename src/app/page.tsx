@@ -1,4 +1,6 @@
-// ① ISR 설정: 60초마다 페이지 갱신
+// 파일 경로: src/app/page.tsx
+
+// ISR 재검증 주기 설정 (초 단위)
 export const revalidate = 60;
 
 import { supabaseAdmin } from '@/lib/supabaseAdminClient';
@@ -13,6 +15,7 @@ interface Illustration {
 }
 
 export default async function HomePage() {
+  // 서버 사이드에서 데이터 가져오기
   const { data: latestData } = await supabaseAdmin
     .from('illustrations')
     .select('id, title, image_url, created_at')
@@ -77,5 +80,5 @@ export default async function HomePage() {
         </Link>
       </div>
     </main>
-);
+  );
 }
