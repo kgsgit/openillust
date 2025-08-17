@@ -1,5 +1,3 @@
-// 파일 경로: middleware.ts
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createMiddlewareSupabaseClient } from '@supabase/auth-helpers-nextjs';
@@ -75,6 +73,5 @@ export const config = {
     '/admin_qr',
     '/admin_qr/:path*',
     '/api/admin_qr/:path*',
-    '/sitemap.xml', // ✅ 사이트맵 추가
   ],
 };

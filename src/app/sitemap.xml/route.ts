@@ -1,62 +1,37 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+// 파일 경로: src/app/sitemap.xml/route.ts
 
-type UrlEntry = {
-  loc: string;
-  changefreq: string;
-  priority: string;
-  lastmod?: string; // ✅ lastmod를 optional 속성으로 선언
-};
+import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabaseAdminClient';
+
+export const revalidate = 60; // 60초마다 갱신
 
 export async function GET() {
-  // DB에서 공개된 일러스트 가져오기
-  const { data: illustrations } = await supabase
+  // 1) DB에서 visible된 illustration ID 가져오기
+  const { data: items, error } = await supabaseAdmin
     .from('illustrations')
-    .select('id, updated_at')
+    .select('id')
     .eq('visible', true);
 
-  const today = new Date().toISOString();
+  if (error) {
+    return new NextResponse('Error generating sitemap', { status: 500 });
+  }
 
-  // 정적 페이지 목록 (lastmod 필드도 같이 넣어줌)
-  const staticPages: UrlEntry[] = [
-    { loc: 'https://openillust.com/', changefreq: 'daily', priority: '1.0', lastmod: today },
-    { loc: 'https://openillust.com/popular', changefreq: 'daily', priority: '0.9', lastmod: today },
-    { loc: 'https://openillust.com/categories', changefreq: 'weekly', priority: '0.8', lastmod: today },
-    { loc: 'https://openillust.com/collections', changefreq: 'weekly', priority: '0.8', lastmod: today },
-    { loc: 'https://openillust.com/info/about', changefreq: 'yearly', priority: '0.5', lastmod: today },
-  ];
+  // 2) URL 목록 생성
+  const domain = 'https://openillust.com';  // ← 실제 도메인으로 변경하세요
+  const urls = [
+    `<url><loc>${domain}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+    ...items!.map(item =>
+      `<url><loc>${domain}/illustration/${item.id}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`
+    )
+  ].join('');
 
-  // DB 기반 동적 페이지
-  const dynamicPages: UrlEntry[] =
-    illustrations?.map((illust) => ({
-      loc: `https://openillust.com/illustration/${illust.id}`,
-      lastmod: illust.updated_at ? new Date(illust.updated_at).toISOString() : today,
-      changefreq: 'monthly',
-      priority: '0.7',
-    })) ?? [];
-
-  const urls: UrlEntry[] = [...staticPages, ...dynamicPages];
-
-  // XML 문자열 생성
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  // 3) XML 포맷으로 리턴
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (url) => `
-  <url>
-    <loc>${url.loc}</loc>
-    ${url.lastmod ? `<lastmod>${url.lastmod}</lastmod>` : ''}
-    <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>
-  </url>`
-  )
-  .join('')}
+  ${urls}
 </urlset>`;
 
-  return new NextResponse(sitemap, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/xml',
-    },
+  return new NextResponse(xml, {
+    headers: { 'Content-Type': 'application/xml' }
   });
 }
