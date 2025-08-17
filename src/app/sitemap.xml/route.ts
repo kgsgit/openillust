@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 
+type UrlEntry = {
+  loc: string;
+  changefreq: string;
+  priority: string;
+  lastmod?: string; // ✅ lastmod를 optional 속성으로 선언
+};
+
 export async function GET() {
   // DB에서 공개된 일러스트 가져오기
   const { data: illustrations } = await supabase
@@ -8,20 +15,19 @@ export async function GET() {
     .select('id, updated_at')
     .eq('visible', true);
 
-  // 오늘 날짜 (기본값으로 사용)
   const today = new Date().toISOString();
 
-  // 정적 페이지 목록
-  const staticPages = [
-    { loc: 'https://openillust.com/', changefreq: 'daily', priority: '1.0' },
-    { loc: 'https://openillust.com/popular', changefreq: 'daily', priority: '0.9' },
-    { loc: 'https://openillust.com/categories', changefreq: 'weekly', priority: '0.8' },
-    { loc: 'https://openillust.com/collections', changefreq: 'weekly', priority: '0.8' },
-    { loc: 'https://openillust.com/info/about', changefreq: 'yearly', priority: '0.5' },
+  // 정적 페이지 목록 (lastmod 필드도 같이 넣어줌)
+  const staticPages: UrlEntry[] = [
+    { loc: 'https://openillust.com/', changefreq: 'daily', priority: '1.0', lastmod: today },
+    { loc: 'https://openillust.com/popular', changefreq: 'daily', priority: '0.9', lastmod: today },
+    { loc: 'https://openillust.com/categories', changefreq: 'weekly', priority: '0.8', lastmod: today },
+    { loc: 'https://openillust.com/collections', changefreq: 'weekly', priority: '0.8', lastmod: today },
+    { loc: 'https://openillust.com/info/about', changefreq: 'yearly', priority: '0.5', lastmod: today },
   ];
 
   // DB 기반 동적 페이지
-  const dynamicPages =
+  const dynamicPages: UrlEntry[] =
     illustrations?.map((illust) => ({
       loc: `https://openillust.com/illustration/${illust.id}`,
       lastmod: illust.updated_at ? new Date(illust.updated_at).toISOString() : today,
@@ -29,8 +35,7 @@ export async function GET() {
       priority: '0.7',
     })) ?? [];
 
-  // 모든 URL 합치기
-  const urls = [...staticPages, ...dynamicPages];
+  const urls: UrlEntry[] = [...staticPages, ...dynamicPages];
 
   // XML 문자열 생성
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
