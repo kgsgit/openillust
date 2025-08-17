@@ -1,91 +1,68 @@
-// 파일 경로: src/app/sitemap.xml/route.ts
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseAdminClient'; // 서버용 Admin 클라이언트(읽기 전용)
-                                                          // 없다면 supabase 클라이언트를 import해서 사용하세요.
+import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 
-const BASE_URL = 'https://openillust.com';
+export const revalidate = 60;             // 60초마다 재생성 (ISR)
+export const dynamic = 'force-dynamic';   // 캐시 이슈 방지(원하면 유지)
 
-// ISO 형식으로 변환 (yyyy-mm-dd)
-function toISODate(d: string | Date | null | undefined) {
-  try {
-    const dt = d ? new Date(d) : new Date();
-    return dt.toISOString();
-  } catch {
-    return new Date().toISOString();
-  }
-}
+const DOMAIN = 'https://openillust.com';
 
-// XML escape
-function esc(s: string) {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const toISO = (d?: string | Date | null) => {
+  try { return (d ? new Date(d) : new Date()).toISOString(); }
+  catch { return new Date().toISOString(); }
+};
 
 export async function GET() {
-  try {
-    // 1) 고정 페이지들
-    const staticUrls = [
-      { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0', lastmod: new Date() },
-      { loc: `${BASE_URL}/popular`, changefreq: 'daily', priority: '0.9', lastmod: new Date() },
-      { loc: `${BASE_URL}/categories`, changefreq: 'weekly', priority: '0.8', lastmod: new Date() },
-      { loc: `${BASE_URL}/collections`, changefreq: 'weekly', priority: '0.8', lastmod: new Date() },
-      { loc: `${BASE_URL}/info/about`, changefreq: 'monthly', priority: '0.6', lastmod: new Date() },
-    ];
+  // 1) DB
+  const { data, error } = await supabaseAdmin
+    .from('illustrations')
+    .select('id, updated_at, created_at')
+    .eq('visible', true)
+    .order('id', { ascending: true });
 
-    // 2) 일러스트 상세 페이지들 (visible = true)
-    const { data, error } = await supabaseAdmin
-      .from('illustrations')
-      .select('id, updated_at, created_at')
-      .eq('visible', true)
-      .order('id', { ascending: true })
-      .limit(50000); // 안전 상한
+  // 2) 기본 URL들
+  const baseNow = new Date();
+  const staticUrls = [
+    { loc: `${DOMAIN}/`,            lastmod: baseNow, changefreq: 'daily',   priority: '1.0' },
+    { loc: `${DOMAIN}/popular`,     lastmod: baseNow, changefreq: 'daily',   priority: '0.9' },
+    { loc: `${DOMAIN}/categories`,  lastmod: baseNow, changefreq: 'weekly',  priority: '0.8' },
+    { loc: `${DOMAIN}/collections`, lastmod: baseNow, changefreq: 'weekly',  priority: '0.8' },
+    { loc: `${DOMAIN}/info/about`,  lastmod: baseNow, changefreq: 'monthly', priority: '0.6' },
+  ];
 
-    if (error) {
-      // 실패 시에도 최소한 고정 URL만 반환
-      console.error('Sitemap Supabase error:', error.message);
-    }
+  const dynamicUrls = (data ?? []).map(row => ({
+    loc: `${DOMAIN}/illustration/${row.id}`,
+    lastmod: row.updated_at || row.created_at || baseNow,
+    changefreq: 'weekly',
+    priority: '0.8'
+  }));
 
-    const dynamicUrls =
-      (data ?? []).map((row: any) => ({
-        loc: `${BASE_URL}/illustration/${row.id}`,
-        changefreq: 'weekly',
-        priority: '0.8',
-        lastmod: row.updated_at || row.created_at || new Date(),
-      })) || [];
+  const urls = [...staticUrls, ...dynamicUrls];
 
-    // 3) XML 조립 (불순 태그 없이 순수 XML만 반환)
-    const urls = [...staticUrls, ...dynamicUrls];
-
-    const xmlItems = urls
-      .map(
-        (u) => `
+  // 3) XML
+  const xmlItems = urls.map(u => `
   <url>
     <loc>${esc(u.loc)}</loc>
-    <lastmod>${esc(toISODate(u.lastmod))}</lastmod>
+    <lastmod>${esc(toISO(u.lastmod))}</lastmod>
     <changefreq>${esc(u.changefreq)}</changefreq>
     <priority>${esc(u.priority)}</priority>
-  </url>`
-      )
-      .join('');
+  </url>`).join('');
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${xmlItems}
 </urlset>`.trim();
 
-    return new NextResponse(xml, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/xml; charset=UTF-8',
-        // 캐시를 원하시면 아래 주석 해제 (예: 1시간)
-        // 'Cache-Control': 'public, max-age=3600'
-      },
-    });
-  } catch (e: any) {
-    console.error('Sitemap fatal error:', e?.message || e);
-    return new NextResponse('Internal Server Error', { status: 500 });
+  if (error) {
+    // DB 오류가 있어도 최소한 기본 URL은 반환되게 할 수도 있음.
+    // 지금은 그대로 XML을 반환(위에서 data ?? [] 처리)하므로 별도 500 리턴 불필요.
+    console.error('sitemap supabase error:', error.message);
   }
+
+  return new NextResponse(xml, {
+    status: 200,
+    headers: { 'Content-Type': 'application/xml; charset=UTF-8' }
+  });
 }
