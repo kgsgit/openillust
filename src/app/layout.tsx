@@ -18,11 +18,14 @@ declare global {
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  // SPA 페이지 전환 시 광고 재호출
+  // SPA 페이지 전환 시 광고 재호출 (중복 방지)
   useEffect(() => {
     try {
       window.adsbygoogle = window.adsbygoogle || [];
-      window.adsbygoogle.push({});
+      // 이미 광고가 삽입된 요소가 없을 때만 push
+      if (!document.querySelector('ins.adsbygoogle[data-adsbygoogle-status="done"]')) {
+        window.adsbygoogle.push({});
+      }
     } catch (e) {
       console.error('Adsense push error:', e);
     }
@@ -49,6 +52,3 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 }
-
-// ISR 제거 → Netlify 빌드 호환
-// export const revalidate = 60;
