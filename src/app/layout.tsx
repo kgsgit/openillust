@@ -13,9 +13,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <title>Images at Your Fingertips, Curated for Purpose.</title>
         <link rel="canonical" href="https://openillust.com/" />
         <link rel="icon" type="image/png" href="/favicon.png" />
+        {/* AdSense 자동광고 글로벌 스크립트 */}
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js?client=ca-pub-2152944666199864"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2152944666199864"
           crossOrigin="anonymous"
         ></script>
       </head>
