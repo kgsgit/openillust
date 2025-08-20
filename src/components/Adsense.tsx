@@ -22,14 +22,6 @@ export default function Adsense() {
     }
   }, [pathname]);
 
-  return (
-    <ins
-      className="adsbygoogle"
-      style={{ display: 'block' }}
-      data-ad-client="ca-pub-2152944666199864"
-      data-ad-slot="1234567890"
-      data-ad-format="auto"
-      data-full-width-responsive="true"
-    ></ins>
-  );
+  // 광고 영역 표시용 <ins> 제거 → 빈 영역 없음
+  return null;
 }
