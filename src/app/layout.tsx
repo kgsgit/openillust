@@ -1,10 +1,43 @@
-// 파일 경로: src/app/layout.tsx
+'use client';
 
 import '@/styles/globals.css';
 import '@/styles/modal.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+
+// TypeScript용 adsbygoogle 타입 선언
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
+
+// Adsense 전용 컴포넌트
+function Adsense() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    try {
+      window.adsbygoogle = window.adsbygoogle || [];
+      window.adsbygoogle.push({});
+    } catch (e) {
+      console.error('Adsense push error:', e);
+    }
+  }, [pathname]);
+
+  return (
+    <ins
+      className="adsbygoogle"
+      style={{ display: 'block' }}
+      data-ad-client="ca-pub-2152944666199864"
+      data-ad-slot="1234567890" // 실제 슬롯 ID로 교체
+      data-ad-format="auto"
+      data-full-width-responsive="true"
+    ></ins>
+  );
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -22,6 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <Header />
+        <Adsense /> {/* 광고 렌더링 */}
         {children}
         <Footer />
       </body>
@@ -29,5 +63,5 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   );
 }
 
-// ISR 재검증 주기 설정 (초 단위)
-export const revalidate = 60;
+// ISR 제거 → Netlify 빌드 호환
+// export const revalidate = 60;
