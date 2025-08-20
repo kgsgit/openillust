@@ -1,4 +1,4 @@
-'use client';
+// 파일 경로: src/app/layout.tsx
 
 import '@/styles/globals.css';
 import '@/styles/modal.css';
@@ -28,3 +28,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 }
+
+// ISR 재검증 주기 설정 (초 단위)
+export const revalidate = 60;
