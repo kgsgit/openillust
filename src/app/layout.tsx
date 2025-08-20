@@ -4,9 +4,29 @@ import '@/styles/globals.css';
 import '@/styles/modal.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+
+// TypeScript용 adsbygoogle 타입 선언
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
+  // SPA 페이지 전환 시 광고 재호출
+  useEffect(() => {
+    try {
+      window.adsbygoogle = window.adsbygoogle || [];
+      window.adsbygoogle.push({});
+    } catch (e) {
+      console.error('Adsense push error:', e);
+    }
+  }, [pathname]);
+
   return (
     <html lang="en">
       <head>
