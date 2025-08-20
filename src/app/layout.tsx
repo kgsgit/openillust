@@ -1,4 +1,5 @@
 // 파일 경로: src/app/layout.tsx
+'use client';
 
 import '@/styles/globals.css';
 import '@/styles/modal.css';
