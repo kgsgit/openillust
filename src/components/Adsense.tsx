@@ -15,13 +15,15 @@ export default function Adsense() {
 
   useEffect(() => {
     try {
-      window.adsbygoogle = window.adsbygoogle || [];
-      window.adsbygoogle.push({});
+      if (typeof window !== 'undefined') {
+        window.adsbygoogle = window.adsbygoogle || [];
+        window.adsbygoogle.push({});
+      }
     } catch (e) {
       console.error('Adsense push error:', e);
     }
   }, [pathname]);
 
-  // 광고 영역 표시용 <ins> 제거 → 빈 영역 없음
+  // 자동광고만 쓸 거라서 수동 광고 <ins> 태그 제거
   return null;
 }
