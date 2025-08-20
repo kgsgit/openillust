@@ -50,5 +50,5 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   );
 }
 
-// ISR 재검증 주기 설정 (초 단위)
-export const revalidate = 60;
+// ISR 제거 → Netlify 빌드 호환
+// export const revalidate = 60;
