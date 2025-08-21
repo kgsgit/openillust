@@ -18,7 +18,7 @@ export default function Head() {
       <meta property="og:title" content="Download instantly, no signup required - OpenIllust" />
       <meta
         property="og:description"
-        content="10 free downloads daily, commercial use allowed. Use commercially without worry."
+        content=" Enjoy 10 free downloads daily for commercial use."
       />
       <meta property="og:url" content="https://www.openillust.com" />
       <meta property="og:type" content="website" />
@@ -29,7 +29,7 @@ export default function Head() {
       <meta name="twitter:title" content="Download instantly, no signup required - OpenIllust" />
       <meta
         name="twitter:description"
-        content="10 free downloads daily, commercial use allowed. Use commercially without worry."
+        content="Enjoy 10 free downloads daily for commercial use."
       />
       <meta name="twitter:image" content="https://www.openillust.com/og-image.png" />
 
