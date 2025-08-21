@@ -6,34 +6,37 @@ export default function Head() {
       <meta charSet="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      {/* 기본 SEO 메타 */}
-      <title>Images at Your Fingertips, Curated for Purpose.</title>
+      {/* 기본 SEO 메타 - 새로운 카피 반영 */}
+      <title>Download instantly, no signup required - OpenIllust</title>
       <meta
         name="description"
-        content="Openillust is not just a repository of images. We curate only the ones you can actually use, without unnecessary repetition. Each illustration is chosen and refined according to rigorous criteria."
+        content="10 free downloads daily, commercial use allowed. Quality illustrations ready for business use without signup hassles."
       />
       <link rel="canonical" href="https://www.openillust.com" />
-      <meta property="og:title" content="Images at Your Fingertips, Curated for Purpose." />
+      
+      {/* Open Graph - 새로운 카피 반영 */}
+      <meta property="og:title" content="Download instantly, no signup required - OpenIllust" />
       <meta
         property="og:description"
-        content="Openillust is not just a repository of images. We curate only the ones you can actually use…"
+        content="10 free downloads daily, commercial use allowed. Use commercially without worry."
       />
       <meta property="og:url" content="https://www.openillust.com" />
       <meta property="og:type" content="website" />
       <meta property="og:image" content="https://www.openillust.com/og-image.png" />
+      
+      {/* Twitter Cards - 새로운 카피 반영 */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="Images at Your Fingertips, Curated for Purpose." />
+      <meta name="twitter:title" content="Download instantly, no signup required - OpenIllust" />
       <meta
         name="twitter:description"
-        content="Openillust is not just a repository of images. We curate only the ones you can actually use…"
+        content="10 free downloads daily, commercial use allowed. Use commercially without worry."
       />
       <meta name="twitter:image" content="https://www.openillust.com/og-image.png" />
 
       {/* Google AdSense */}
       <script
         async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
-        data-ad-client="ca-pub-2152944666199864"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2152944666199864"
         crossOrigin="anonymous"
       ></script>
 
@@ -50,7 +53,7 @@ export default function Head() {
         }}
       />
 
-      {/* JSON-LD 구조화 데이터 */}
+      {/* JSON-LD 구조화 데이터 - 새로운 카피 반영 */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -58,12 +61,12 @@ export default function Head() {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             url: 'https://www.openillust.com',
-            name: 'Openillust',
+            name: 'OpenIllust',
             description:
-              'Openillust is not just a repository of images. We curate only the ones you can actually use…',
+              'Download instantly, no signup required. 10 free downloads daily, commercial use allowed. Quality illustrations for business use.',
             publisher: {
               '@type': 'Organization',
-              name: 'Openillust',
+              name: 'OpenIllust',
               logo: {
                 '@type': 'ImageObject',
                 url: 'https://www.openillust.com/logo.png',

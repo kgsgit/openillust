@@ -36,10 +36,13 @@ export default async function HomePage() {
     <main className="max-w-screen-xl mx-auto px-4 py-8">
       <section className="text-center mb-8">
         <h1 className="text-2xl font-bold">
-          Not just more images. Only the right ones.
+          Download instantly, no signup required
         </h1>
         <p className="mt-4 text-lg text-gray-700">
-          No clutter—just ready-to-use illustrations, instantly.
+          10 free downloads daily, commercial use allowed
+        </p>
+        <p className="mt-2 text-base text-gray-600">
+          Use commercially without worry
         </p>
       </section>
 

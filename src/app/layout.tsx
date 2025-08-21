@@ -5,7 +5,8 @@ import Footer from '@/components/Footer';
 import { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Images at Your Fingertips, Curated for Purpose.',
+  title: 'Download instantly, no signup required - OpenIllust',
+  description: '10 free downloads daily, commercial use allowed. Quality illustrations ready for business use without signup hassles.',
   canonical: 'https://openillust.com/',
 };
 
