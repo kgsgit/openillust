@@ -44,17 +44,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     '/cdn/illustrations/images/$1'
   );
 
-  return {
+return {
+  title: ill.title,
+  description: ill.description ?? undefined,
+  openGraph: {
     title: ill.title,
     description: ill.description ?? undefined,
-    openGraph: {
-      title: ill.title,
-      description: ill.description ?? undefined,
-      images: [ogImage],
-      url: `https://AboutMyHouse.kr/illustration/${illustrationId}`,
-    },
-    twitter: { card: 'summary_large_image' },
-  };
+    images: [ogImage],
+    url: `https://openillust.com/illustration/${illustrationId}`, // 배포 도메인
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: `https://openillust.com/illustration/${illustrationId}`, // 동일한 도메인
+  },
+};
+
 }
 
 // 3) 페이지 컴포넌트: 역시 await
