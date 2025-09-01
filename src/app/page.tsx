@@ -31,6 +31,16 @@ export default async function HomePage() {
     .limit(8);
   const popular: Illustration[] = popularData ?? [];
 
+  // 총 다운로드 수 계산
+  const { data: downloadStats } = await supabaseAdmin
+    .from('illustrations')
+    .select('download_count_svg, download_count_png')
+    .eq('visible', true);
+  
+  const totalDownloads = downloadStats?.reduce((total, item) => {
+    return total + (item.download_count_svg || 0) + (item.download_count_png || 0);
+  }, 0) || 0;
+
   return (
     <main className="max-w-screen-xl mx-auto px-4 py-8">
       {/* 히어로 섹션 */}
@@ -65,7 +75,9 @@ export default async function HomePage() {
             <div className="text-sm text-gray-600">Latest illustrations</div>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-slate-700">1000+</div>
+            <div className="text-2xl font-bold text-slate-700">
+              {totalDownloads > 0 ? totalDownloads.toLocaleString() : '0'}
+            </div>
             <div className="text-sm text-gray-600">Total downloads</div>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-lg">
