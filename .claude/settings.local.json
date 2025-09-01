@@ -5,7 +5,9 @@
       "Bash(npm run build:*)",
       "WebSearch",
       "Bash(find:*)",
-      "WebFetch(domain:openillust.com)"
+      "WebFetch(domain:openillust.com)",
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:localhost)"
     ],
     "deny": [],
     "ask": []
