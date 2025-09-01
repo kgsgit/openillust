@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 관리자 페이지는 동적 렌더링으로 설정
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
-  },
   async rewrites() {
     return [
       {

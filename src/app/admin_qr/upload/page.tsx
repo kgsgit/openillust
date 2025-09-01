@@ -1,6 +1,6 @@
-'use client';                                  // 1) 반드시 최상단
-export const dynamic = 'force-dynamic';        // 2) 클라이언트 전용 강제 렌더링
-n// 정적 생성 비활성화
+'use client';
+
+// 정적 생성 비활성화
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
