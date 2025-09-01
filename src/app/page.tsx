@@ -103,12 +103,9 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-sm font-medium mb-2 line-clamp-2">
+                  <h3 className="text-sm font-medium line-clamp-2">
                     {item.title}
                   </h3>
-                  <div className="text-xs text-gray-500">
-                    {new Date(item.created_at).toLocaleDateString('ko-KR')}
-                  </div>
                 </div>
               </div>
             </Link>
@@ -140,12 +137,9 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-sm font-medium mb-2 line-clamp-2">
+                  <h3 className="text-sm font-medium line-clamp-2">
                     {item.title}
                   </h3>
-                  <div className="text-xs text-gray-500 flex items-center gap-2">
-                    <span>📥 {(item.download_count_svg + item.download_count_png).toLocaleString()}회</span>
-                  </div>
                 </div>
               </div>
             </Link>

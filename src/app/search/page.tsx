@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 import ThumbnailImage from '@/components/ThumbnailImage';
 import Link from 'next/link';
+import SearchTracker from '@/components/SearchTracker';
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams;
@@ -71,6 +72,7 @@ async function SearchResults({ query }: { query: string }) {
 
   return (
     <div>
+      <SearchTracker query={query} resultsCount={results.length} />
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">
           Search results for '{query}'

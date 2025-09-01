@@ -1,4 +1,21 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.openillust.com/sitemap.xml
+# Disallow admin pages
+Disallow: /admin_qr/
+
+# Allow important pages
+Allow: /
+Allow: /illustration/
+Allow: /categories/
+Allow: /collections/
+Allow: /tags/
+Allow: /search
+Allow: /popular
+Allow: /info/
+
+# Crawl delay (optional - helps prevent server overload)
+Crawl-delay: 1
+
+# Sitemap locations
+Sitemap: https://openillust.com/sitemap.xml

@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { FaFacebookF, FaTwitter, FaShareAlt, FaCoffee } from 'react-icons/fa';
 import DownloadModal from '@/components/DownloadModal';
 import Banner from '@/components/Banner';
+import SocialShare from '@/components/SocialShare';
 import { useDownloadLimit } from '@/hooks/useDownloadLimit';
+import { trackDownload } from '@/components/Analytics';
 
 interface IllustrationData {
   id: number;
@@ -78,6 +80,7 @@ const IllustrationClient: React.FC<IllustrationClientProps> = ({
       a.click();
       document.body.removeChild(a);
       incrementLocalCount();
+      trackDownload(data.id, fmt, data.title);
     } else {
       const fileRes = await fetch(url);
       if (!fileRes.ok) {
@@ -121,6 +124,7 @@ const IllustrationClient: React.FC<IllustrationClientProps> = ({
               document.body.removeChild(a);
               URL.revokeObjectURL(pngUrl);
               incrementLocalCount();
+              trackDownload(data.id, fmt, data.title);
             } else {
               alert('PNG conversion failed.');
             }
@@ -225,41 +229,12 @@ const IllustrationClient: React.FC<IllustrationClientProps> = ({
             </p>
           </div>
 
-          {/* 공유 버튼 */}
-          <div className="flex gap-4 mt-4">
-            <button
-              onClick={() =>
-                window.open(
-                  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                    window.location.href
-                  )}`,
-                  '_blank'
-                )
-              }
-              className="flex items-center gap-2 px-2 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
-            >
-              <FaFacebookF size={15} />
-            </button>
-            <button
-              onClick={() =>
-                window.open(
-                  `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                    window.location.href
-                  )}`,
-                  '_blank'
-                )
-              }
-              className="flex items-center gap-2 px-2 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
-            >
-              <FaTwitter size={15} />
-            </button>
-            <button
-              onClick={() => navigator.share?.({ url: window.location.href })}
-              className="flex items-center gap-2 px-2 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-            >
-              <FaShareAlt size={15} />
-            </button>
-          </div>
+          {/* Social Share */}
+          <SocialShare
+            url={`https://openillust.com/illustration/${data.id}`}
+            title={`${data.title} - Free illustration download`}
+            description="Download this free illustration for commercial use. No signup required."
+          />
 
           {/* 배너 */}
           <div className="mt-6">
