@@ -8,7 +8,10 @@
       "WebFetch(domain:openillust.com)",
       "WebFetch(domain:localhost)",
       "WebFetch(domain:localhost)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm prune:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "ask": []
