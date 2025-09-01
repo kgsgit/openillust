@@ -49,36 +49,10 @@ export default function NotFound() {
           </div>
         </div>
 
-        {/* 검색 제안 */}
+        {/* 추가 도움말 */}
         <div className="mt-8 text-sm text-gray-500">
-          <p>or try searching for something specific:</p>
-          <div className="mt-2 flex">
-            <input
-              type="text"
-              placeholder="Search illustrations..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-slate-500 text-gray-900"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const query = (e.target as HTMLInputElement).value;
-                  if (query.trim()) {
-                    window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
-                  }
-                }
-              }}
-            />
-            <button
-              onClick={(e) => {
-                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                const query = input.value;
-                if (query.trim()) {
-                  window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
-                }
-              }}
-              className="px-4 py-2 bg-slate-600 text-white rounded-r-lg hover:bg-slate-700 transition-colors"
-            >
-              🔍
-            </button>
-          </div>
+          <p>Browse our collection of free illustrations</p>
+          <p className="mt-1">Perfect for your creative projects!</p>
         </div>
       </div>
     </div>

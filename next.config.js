@@ -1,5 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 빌드 시 관리자 페이지 제외
+  async redirects() {
+    return [
+      {
+        source: '/admin_qr/:path*',
+        has: [
+          {
+            type: 'header',
+            key: 'user-agent',
+            value: '(.*Next.js.*)', // Next.js 빌드 봇 감지
+          },
+        ],
+        destination: '/404',
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

@@ -3,6 +3,9 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
+// 정적 생성 비활성화
+export const dynamic = 'force-dynamic';
+
 interface Tag {
   id: number;
   name: string;
