@@ -6,7 +6,8 @@ import ThumbnailImage from '@/components/ThumbnailImage';
 import Link from 'next/link';
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const query = searchParams.q || '';
+  const { q } = await searchParams;
+  const query = q || '';
   
   if (!query) {
     return {
@@ -36,7 +37,7 @@ interface Illustration {
 }
 
 interface SearchPageProps {
-  searchParams: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }
 
 async function SearchResults({ query }: { query: string }) {
@@ -108,7 +109,8 @@ async function SearchResults({ query }: { query: string }) {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q || '';
+  const { q } = await searchParams;
+  const query = q || '';
 
   return (
     <main className="max-w-screen-xl mx-auto px-4 py-8">

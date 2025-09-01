@@ -12,13 +12,15 @@ interface Illustration {
   title: string;
   image_url: string;
   created_at: string;
+  download_count_svg: number;
+  download_count_png: number;
 }
 
 export default async function HomePage() {
   // 서버 사이드에서 데이터 가져오기
   const { data: latestData } = await supabaseAdmin
     .from('illustrations')
-    .select('id, title, image_url, created_at')
+    .select('id, title, image_url, created_at, download_count_svg, download_count_png')
     .eq('visible', true)
     .order('created_at', { ascending: false })
     .limit(12);
@@ -26,7 +28,7 @@ export default async function HomePage() {
 
   const { data: popularData } = await supabaseAdmin
     .from('illustrations')
-    .select('id, title, image_url, created_at')
+    .select('id, title, image_url, created_at, download_count_svg, download_count_png')
     .eq('visible', true)
     .order('download_count_svg', { ascending: false })
     .limit(8);
