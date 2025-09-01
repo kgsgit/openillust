@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
+// 정적 생성 비활성화
+export const dynamic = 'force-dynamic';
+
 interface Illustration {
   id: number;
   title: string;

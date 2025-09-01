@@ -1,5 +1,7 @@
 // 파일 경로: src/app/admin/settings/page.tsx
 'use client';
+n// 정적 생성 비활성화
+export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 

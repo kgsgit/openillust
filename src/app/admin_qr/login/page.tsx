@@ -1,5 +1,7 @@
 'use client';
 
+n// 정적 생성 비활성화
+export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
