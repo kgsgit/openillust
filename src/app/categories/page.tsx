@@ -14,9 +14,6 @@ type Illustration = {
   id: number;
   title: string;
   image_url: string;
-  download_count_svg: number;
-  download_count_png: number;
-  created_at: string;
 };
 
 type Collection = {
@@ -60,10 +57,10 @@ export default async function CategoriesPage({
   }
   const collections: Collection[] = collectionsData || [];
 
-  // Build query with filters
+  // Build query with filters - 필수 필드만 로딩
   let query = supabaseAdmin
     .from('illustrations')
-    .select('id, title, image_url, download_count_svg, download_count_png, created_at', { count: 'exact' })
+    .select('id, title, image_url', { count: 'exact' })
     .eq('visible', true);
 
   // Apply tag filters

@@ -9,14 +9,15 @@ export const metadata = {
   title: 'Download instantly, no signup required - OpenIllust',
   description: '10 free downloads daily, commercial use allowed. Quality illustrations ready for business use without signup hassles.',
   canonical: 'https://openillust.com/',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        
+      <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
         {/* Google Analytics 4 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-J0QHBDLF6F"></script>
         <script
@@ -84,8 +85,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2152944666199864"
           crossOrigin="anonymous"
         />
-      </head>
-      <body>
+
         <Suspense fallback={null}>
           <Analytics />
         </Suspense>

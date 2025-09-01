@@ -11,16 +11,13 @@ interface Illustration {
   id: number;
   title: string;
   image_url: string;
-  created_at: string;
-  download_count_svg: number;
-  download_count_png: number;
 }
 
 export default async function HomePage() {
-  // 서버 사이드에서 데이터 가져오기
+  // 서버 사이드에서 데이터 가져오기 - 필수 필드만 로딩
   const { data: latestData } = await supabaseAdmin
     .from('illustrations')
-    .select('id, title, image_url, created_at, download_count_svg, download_count_png')
+    .select('id, title, image_url')
     .eq('visible', true)
     .order('created_at', { ascending: false })
     .limit(12);
@@ -28,7 +25,7 @@ export default async function HomePage() {
 
   const { data: popularData } = await supabaseAdmin
     .from('illustrations')
-    .select('id, title, image_url, created_at, download_count_svg, download_count_png')
+    .select('id, title, image_url')
     .eq('visible', true)
     .order('download_count_svg', { ascending: false })
     .limit(8);
@@ -68,7 +65,7 @@ export default async function HomePage() {
             <div className="text-sm text-gray-600">Latest illustrations</div>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-slate-700">{popular.reduce((sum, item) => sum + item.download_count_svg + item.download_count_png, 0).toLocaleString()}</div>
+            <div className="text-2xl font-bold text-slate-700">1000+</div>
             <div className="text-sm text-gray-600">Total downloads</div>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-lg">

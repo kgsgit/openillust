@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import ThemeToggle from './ThemeToggle';
 
 interface Collection {
   id: number;
@@ -21,12 +22,28 @@ export default function Header() {
   let startX = 0;
 
   useEffect(() => {
+    // 로컬스토리지에서 캐싱된 컬렉션 확인
+    const cached = localStorage.getItem('collections_cache');
+    const cacheTime = localStorage.getItem('collections_cache_time');
+    const now = Date.now();
+    
+    if (cached && cacheTime && now - parseInt(cacheTime) < 300000) { // 5분 캐시
+      setCollections(JSON.parse(cached));
+      return;
+    }
+    
     (async () => {
       const { data } = await supabase
         .from('collections')
         .select('id, name, thumbnail_url')
-        .order('created_at', { ascending: false });
-      if (data) setCollections(data);
+        .order('created_at', { ascending: false })
+        .limit(10); // 최대 10개로 제한
+      
+      if (data) {
+        setCollections(data);
+        localStorage.setItem('collections_cache', JSON.stringify(data));
+        localStorage.setItem('collections_cache_time', now.toString());
+      }
     })();
   }, []);
 
@@ -53,7 +70,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white dark:bg-gray-900 shadow-md dark:shadow-gray-800">
       <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3">
         {/* 로고 */}
         <Link href="/" className="flex-shrink-0 mr-4">
@@ -102,13 +119,13 @@ export default function Header() {
 
         {/* 모바일 햄버거 버튼 */}
         <button
-          className="block md:hidden flex-shrink-0 ml-4 flex flex-col justify-between h-5"
+          className="block md:hidden flex-shrink-0 ml-4 p-2 flex flex-col justify-between h-8 touch-manipulation"
           aria-label="메뉴 열기"
           onClick={() => setMenuOpen(o => !o)}
         >
-          <span className="block w-6 h-0.5 bg-gray-700"></span>
-          <span className="block w-6 h-0.5 bg-gray-700"></span>
-          <span className="block w-6 h-0.5 bg-gray-700"></span>
+          <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-gray-700 transition-opacity duration-200 ${menuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+          <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
         </button>
 
         {/* 검색 바 */}
@@ -131,48 +148,79 @@ export default function Header() {
         </form>
 
         {/* 데스크탑 네비게이션 */}
-        <nav className="hidden md:flex ml-6 space-x-4">
-          <Link href="/categories" className="text-gray-700 hover:text-gray-900">
+        <nav className="hidden md:flex ml-6 items-center space-x-4">
+          <Link href="/categories" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
             Categories
           </Link>
-          <Link href="/collections" className="text-gray-700 hover:text-gray-900">
+          <Link href="/collections" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
             Collections
           </Link>
-          <Link href="/popular" className="text-gray-700 hover:text-gray-900">
+          <Link href="/popular" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
             Popular
           </Link>
-          <Link href="/info/about" className="text-gray-700 hover:text-gray-900">
+          <Link href="/info/about" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
             About
           </Link>
+          <ThemeToggle />
         </nav>
       </div>
 
       {/* 모바일 네비게이션 */}
       {menuOpen && (
-        <nav className="md:hidden bg-white shadow-inner">
-          <div className="max-w-screen-xl mx-auto px-4 py-2 flex flex-col space-y-1">
+        <nav className="md:hidden bg-white dark:bg-gray-900 shadow-inner border-t border-gray-200 dark:border-gray-700">
+          <div className="max-w-screen-xl mx-auto px-4 py-4 space-y-3">
             {/* 모바일 검색 */}
-            <form onSubmit={handleSearch} className="mb-2">
+            <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search illustrations..."
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 text-base touch-manipulation bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 p-1 touch-manipulation"
                 >
                   🔍
                 </button>
               </div>
             </form>
-            <Link href="/categories" className="p-2">Categories</Link>
-            <Link href="/collections" className="p-2">Collections</Link>
-            <Link href="/popular" className="p-2">Popular</Link>
-            <Link href="/info/about" className="p-2">About</Link>
+            <Link 
+              href="/categories" 
+              className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 rounded-lg transition-colors font-medium touch-manipulation"
+              onClick={() => setMenuOpen(false)}
+            >
+              Categories
+            </Link>
+            <Link 
+              href="/collections" 
+              className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 rounded-lg transition-colors font-medium touch-manipulation"
+              onClick={() => setMenuOpen(false)}
+            >
+              Collections
+            </Link>
+            <Link 
+              href="/popular" 
+              className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 rounded-lg transition-colors font-medium touch-manipulation"
+              onClick={() => setMenuOpen(false)}
+            >
+              Popular
+            </Link>
+            <Link 
+              href="/info/about" 
+              className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 rounded-lg transition-colors font-medium touch-manipulation"
+              onClick={() => setMenuOpen(false)}
+            >
+              About
+            </Link>
+            
+            {/* 모바일 테마 토글 */}
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Theme</span>
+              <ThemeToggle />
+            </div>
           </div>
         </nav>
       )}
