@@ -16,6 +16,9 @@ interface IllustrationData {
   image_url: string;
   tags?: string[] | null;
   collection_id?: number | null;
+  download_count_svg?: number;
+  download_count_png?: number;
+  created_at?: string;
 }
 interface Tag { id: number; name: string; }
 interface RelatedImage { id: number; image_url: string; }
@@ -66,10 +69,10 @@ export default async function IllustrationPage({ params }: PageProps) {
   const { id } = await params;  // ← 여기서도 await!
   const illustrationId = Number(id);
 
-  // 기본 일러스트 데이터 로드
+  // 기본 일러스트 데이터 로드 (다운로드 통계 포함)
   const { data: illustration, error: illError } = (await supabaseAdmin
     .from('illustrations')
-    .select('id, title, description, image_url, tags, collection_id')
+    .select('id, title, description, image_url, tags, collection_id, download_count_svg, download_count_png, created_at')
     .eq('id', illustrationId)
     .single()) as { data: IllustrationData | null; error: any };
 

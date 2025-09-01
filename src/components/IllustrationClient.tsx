@@ -13,6 +13,9 @@ interface IllustrationData {
   title: string;
   description: string | null;
   image_url: string;
+  download_count_svg?: number;
+  download_count_png?: number;
+  created_at?: string;
 }
 
 interface RelatedImage {
@@ -160,6 +163,7 @@ const IllustrationClient: React.FC<IllustrationClientProps> = ({
               onContextMenu={(e) => e.preventDefault()}
             />
           </div>
+
           {tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {tags.map((t) => (
