@@ -2,8 +2,8 @@ import '@/styles/globals.css';
 import '@/styles/modal.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import Analytics from '@/components/Analytics';
-import { ReactNode, Suspense } from 'react';
+import AnalyticsWrapper from '@/components/AnalyticsWrapper';
+import { ReactNode } from 'react';
 
 export const metadata = {
   title: 'Download instantly, no signup required - OpenIllust',
@@ -86,9 +86,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           crossOrigin="anonymous"
         />
 
-        <Suspense fallback={null}>
-          <Analytics />
-        </Suspense>
+        <AnalyticsWrapper />
         <Header />
         {children}
         <Footer />

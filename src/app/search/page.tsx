@@ -55,7 +55,7 @@ async function SearchResults({ query }: { query: string }) {
     .from('illustrations')
     .select('id, title, image_url, download_count_svg, download_count_png, created_at, tags')
     .eq('visible', true)
-    .or(`title.ilike.%${query}%, tags.cs.["${query}"]`)
+    .or(`title.ilike.%${query}%, tags.cd.["${query}"]`)
     .order('download_count_svg', { ascending: false })
     .limit(50);
 

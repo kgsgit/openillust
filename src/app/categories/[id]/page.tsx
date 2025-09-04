@@ -47,7 +47,7 @@ export default async function CategoryDetailPage({
     .from('illustrations')
     .select('id, title, image_url', { count: 'exact' })
     .eq('visible', true)
-    .filter('tags', 'cs', JSON.stringify([tagName]))
+    .filter('tags', 'cd', [tagName])
     .order('created_at', { ascending: false })
     .range(from, to);
   if (illError) {

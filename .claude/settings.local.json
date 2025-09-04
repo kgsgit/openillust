@@ -11,7 +11,8 @@
       "Bash(npx supabase:*)",
       "Bash(npm ls:*)",
       "Bash(npm prune:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

@@ -22,7 +22,8 @@ export default function TagDetailPage() {
       const { data, error } = await supabase
         .from('illustrations')
         .select('id, title, image_url, created_at')
-        .contains('tags', [tag])
+        .eq('visible', true)
+        .filter('tags', 'cd', [tag])
         .order('created_at', { ascending: false });
       if (!error && data) setItems(data);
     })();

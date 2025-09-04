@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabaseAdminClient';
 import ThumbnailImage from '@/components/ThumbnailImage';
-import FilterBar from '@/components/FilterBar';
 
 type Tag = {
   id: number;
@@ -14,30 +13,22 @@ type Illustration = {
   id: number;
   title: string;
   image_url: string;
-};
-
-type Collection = {
-  id: number;
-  name: string;
+  tags?: string[] | null;
 };
 
 export default async function CategoriesPage({
   searchParams,
 }: {
   searchParams: Promise<{ 
+    tag?: string;
     page?: string; 
-    tags?: string; 
-    collection?: string; 
-    sort?: string;
   }>;
 }) {
-  const { page, tags, collection, sort } = await searchParams;
+  const { tag, page } = await searchParams;
   const currentPage = parseInt(page ?? '1', 10);
   const perPage = 40;
-  const from = (currentPage - 1) * perPage;
-  const to = currentPage * perPage - 1;
 
-  // Load tags for filter
+  // Load all tags
   const { data: tagData, error: tagsError } = await supabaseAdmin
     .from('tags')
     .select('id, name')
@@ -47,73 +38,93 @@ export default async function CategoriesPage({
   }
   const allTags: Tag[] = tagData || [];
 
-  // Load collections for filter
-  const { data: collectionsData, error: collectionsError } = await supabaseAdmin
-    .from('collections')
-    .select('id, name')
-    .order('name', { ascending: true });
-  if (collectionsError) {
-    throw new Error(`Failed to load collections: ${collectionsError.message}`);
-  }
-  const collections: Collection[] = collectionsData || [];
-
-  // Build query with filters - 필수 필드만 로딩
-  let query = supabaseAdmin
+  // Load all illustrations (we'll filter client-side)
+  const { data: illData, error: illError } = await supabaseAdmin
     .from('illustrations')
-    .select('id, title, image_url', { count: 'exact' })
-    .eq('visible', true);
-
-  // Apply tag filters
-  if (tags) {
-    const tagList = tags.split(',').map(t => t.trim());
-    // Filter illustrations that have any of the selected tags
-    query = query.overlaps('tags', tagList);
-  }
-
-  // Apply collection filter
-  if (collection) {
-    query = query.eq('collection_id', parseInt(collection, 10));
-  }
-
-  // Apply sorting
-  switch (sort) {
-    case 'oldest':
-      query = query.order('created_at', { ascending: true });
-      break;
-    case 'popular':
-      query = query.order('download_count_svg', { ascending: false });
-      break;
-    case 'alphabetical':
-      query = query.order('title', { ascending: true });
-      break;
-    default: // newest
-      query = query.order('created_at', { ascending: false });
-  }
-
-  const { data: illData, error: illError, count } = await query.range(from, to);
+    .select('id, title, image_url, tags')
+    .eq('visible', true)
+    .order('created_at', { ascending: false });
   if (illError) {
     throw new Error(`Failed to load illustrations: ${illError.message}`);
   }
-  const illustrations: Illustration[] = illData || [];
-  const totalItems = count ?? 0;
+  const allIllustrations: Illustration[] = illData || [];
+  
+  // Client-side filtering by tag
+  let filteredIllustrations = allIllustrations;
+  if (tag) {
+    filteredIllustrations = allIllustrations.filter(ill => {
+      if (!ill.tags) return false;
+      if (Array.isArray(ill.tags)) {
+        return ill.tags.includes(tag);
+      }
+      // If tags is a string, try to parse as JSON
+      if (typeof ill.tags === 'string') {
+        try {
+          const parsedTags = JSON.parse(ill.tags);
+          return Array.isArray(parsedTags) && parsedTags.includes(tag);
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    });
+  }
+  
+  // Apply pagination to filtered results
+  const totalItems = filteredIllustrations.length;
   const totalPages = Math.ceil(totalItems / perPage);
+  const from = (currentPage - 1) * perPage;
+  const to = currentPage * perPage;
+  const illustrations = filteredIllustrations.slice(from, to);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Browse Illustrations</h1>
+      <h1 className="text-3xl font-bold mb-8">Categories</h1>
 
-      {/* Filter Bar */}
-      <FilterBar tags={allTags} collections={collections} />
-
-      {/* Results Summary */}
-      <div className="mb-6">
-        <p className="text-gray-600">
-          Showing {illustrations.length} of {totalItems} illustrations
-          {tags && ` filtered by tags: ${tags.replace(/,/g, ', ')}`}
-          {collection && ` in collection: ${collections.find(c => c.id.toString() === collection)?.name}`}
-        </p>
+      {/* Tag Buttons */}
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/categories"
+            className={`px-4 py-2 rounded-full border transition-all ${
+              !tag
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+            }`}
+          >
+            All
+          </Link>
+          {allTags.map(tagItem => (
+            <Link
+              key={tagItem.id}
+              href={`/categories?tag=${encodeURIComponent(tagItem.name)}`}
+              className={`px-4 py-2 rounded-full border transition-all ${
+                tag === tagItem.name
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+              }`}
+            >
+              {tagItem.name}
+            </Link>
+          ))}
+        </div>
       </div>
 
+      {/* Current Category */}
+      {tag && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-800">'{tag}' illustrations</h2>
+          <p className="text-gray-600">Showing {illustrations.length} illustrations</p>
+        </div>
+      )}
+
+      {!tag && (
+        <div className="mb-6">
+          <p className="text-gray-600">Showing {illustrations.length} of {totalItems} illustrations</p>
+        </div>
+      )}
+
+      {/* Illustrations Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
         {illustrations.map(item => (
           <Link
@@ -129,11 +140,12 @@ export default async function CategoriesPage({
         ))}
       </div>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-2">
           {currentPage > 1 && (
             <Link
-              href={`/categories?page=${currentPage - 1}${tags ? `&tags=${tags}` : ''}${collection ? `&collection=${collection}` : ''}${sort ? `&sort=${sort}` : ''}`}
+              href={`/categories?${tag ? `tag=${encodeURIComponent(tag)}&` : ''}page=${currentPage - 1}`}
               className="px-3 py-1 border rounded hover:bg-gray-100"
             >
               ← Previous
@@ -144,7 +156,7 @@ export default async function CategoriesPage({
           </span>
           {currentPage < totalPages && (
             <Link
-              href={`/categories?page=${currentPage + 1}${tags ? `&tags=${tags}` : ''}${collection ? `&collection=${collection}` : ''}${sort ? `&sort=${sort}` : ''}`}
+              href={`/categories?${tag ? `tag=${encodeURIComponent(tag)}&` : ''}page=${currentPage + 1}`}
               className="px-3 py-1 border rounded hover:bg-gray-100"
             >
               Next →
